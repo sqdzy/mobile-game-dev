@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 15,
         marginBottom: 10,
-        maxHeight: 300,
+        height: 350,
         elevation: 4,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
