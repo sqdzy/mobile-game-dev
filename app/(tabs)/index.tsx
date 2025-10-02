@@ -1,51 +1,76 @@
-import Match3Board from '@/components/match3/Match3Board';
-import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import ActionMenu from '@/components/match3/ActionMenu';
+import GameGrid from '@/components/match3/GameGrid';
+import LogCard from '@/components/match3/LogCard';
+import StatsCard from '@/components/match3/StatsCard';
+import { RootStore, RootStoreContext } from '@/store/RootStore';
+import React from 'react';
+import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function Match3Screen() {
-  const [status, setStatus] = useState<'playing' | 'won' | 'lost'>('playing');
-  const [finalScore, setFinalScore] = useState(0);
-  const restart = () => {
-    setStatus('playing');
-    setFinalScore(0);
-    // Remount board via key change by toggling state
-    setBoardKey((k) => k + 1);
-  };
-  const [boardKey, setBoardKey] = useState(0);
+const { width: SCREEN_W } = Dimensions.get('window');
+const isTablet = SCREEN_W > 768;
 
+const rootStore = new RootStore();
+
+export default function Match3Game() {
   return (
-    <View style={styles.container}>
-      {status === 'playing' && (
-        <Match3Board
-          key={boardKey}
-          onLevelComplete={(score) => {
-            setFinalScore(score);
-            setStatus('won');
-          }}
-          onGameOver={(score) => {
-            setFinalScore(score);
-            setStatus('lost');
-          }}
-        />
-      )}
-      {status !== 'playing' && (
-        <View style={styles.overlay}>
-          <Text style={styles.title}>{status === 'won' ? 'Уровень пройден!' : 'Игра окончена'}</Text>
-          <Text style={styles.sub}>Очки: {finalScore}</Text>
-          <Pressable style={styles.button} onPress={restart}>
-            <Text style={styles.buttonText}>Играть снова</Text>
-          </Pressable>
-        </View>
-      )}
-    </View>
+    <RootStoreContext.Provider value={rootStore}>
+      <SafeAreaView style={styles.container}>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {isTablet ? (
+            <View style={styles.tabletLayout}>
+              <View style={styles.tabletLeft}>
+                <GameGrid />
+              </View>
+              <View style={styles.tabletRight}>
+                <ActionMenu />
+                <StatsCard />
+                <LogCard />
+              </View>
+            </View>
+          ) : (
+            <View style={styles.mobileLayout}>
+              <GameGrid />
+              <View style={styles.sidePanel}>
+                <ActionMenu />
+                <StatsCard />
+                <LogCard />
+              </View>
+            </View>
+          )}
+        </ScrollView>
+      </SafeAreaView>
+    </RootStoreContext.Provider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#121216' },
-  overlay: { ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000a' },
-  title: { color: '#fff', fontSize: 32, fontWeight: 'bold', marginBottom: 12 },
-  sub: { color: '#fff', fontSize: 18, marginBottom: 24 },
-  button: { backgroundColor: '#2563eb', paddingHorizontal: 28, paddingVertical: 14, borderRadius: 30 },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  container: {
+    flex: 1,
+    backgroundColor: '#f0f0f0',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    padding: 10,
+  },
+  tabletLayout: {
+    flexDirection: 'row',
+    gap: 15,
+  },
+  tabletLeft: {
+    flex: 2,
+  },
+  tabletRight: {
+    flex: 1,
+    minWidth: 300,
+  },
+  mobileLayout: {
+    gap: 15,
+  },
+  sidePanel: {
+    gap: 10,
+  },
 });
