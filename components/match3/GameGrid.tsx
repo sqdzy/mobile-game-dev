@@ -50,6 +50,7 @@ const styles = StyleSheet.create({
         position: 'relative',
         backgroundColor: '#f5f5f5',
         borderRadius: 10,
+        overflow: 'hidden',
         elevation: 4,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },

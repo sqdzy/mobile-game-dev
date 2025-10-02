@@ -17,6 +17,7 @@ interface RoundCellProps {
     zIndex: number;
     icon: string;
     select: (x: number, y: number) => void;
+    isRemoving?: boolean;
 }
 
 const iconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
@@ -39,20 +40,60 @@ const RoundCellComponent: React.FC<RoundCellProps> = ({
     zIndex,
     icon,
     select,
+    isRemoving = false,
 }) => {
-    const animatedStyle = useAnimatedStyle(() => {
+    // Анимация выделения и удаления (масштаб и прозрачность)
+    const selectionStyle = useAnimatedStyle(() => {
+        // Скрываем ячейки которые за пределами поля (сверху)
+        if (top < 0) {
+            return {
+                transform: [{ scale: 1 }],
+                opacity: 0,
+            };
+        }
+        
+        if (isRemoving) {
+            return {
+                transform: [
+                    { 
+                        scale: withSpring(0, { 
+                            damping: 15, 
+                            stiffness: 150,
+                            mass: 0.5
+                        }) 
+                    }
+                ],
+                opacity: withTiming(0, { duration: 300 }),
+            };
+        }
+        
         return {
             transform: [
-                { scale: withSpring(selected ? 1.15 : 1, { damping: 10, stiffness: 100 }) }
+                { 
+                    scale: withSpring(selected ? 1.15 : 1, { 
+                        damping: 15, 
+                        stiffness: 150,
+                        mass: 0.5
+                    }) 
+                }
             ],
-            opacity: withTiming(selected ? 0.8 : 1, { duration: 200 }),
+            opacity: withTiming(selected ? 0.85 : 1, { duration: 200 }),
         };
     });
 
+    // Плавная анимация позиции (для падения и перемещения)
     const positionStyle = useAnimatedStyle(() => {
         return {
-            top: `${top}%` as any,
-            left: `${left}%` as any,
+            top: withSpring(`${top}%` as any, {
+                damping: 20,
+                stiffness: 90,
+                mass: 0.8,
+            }),
+            left: withSpring(`${left}%` as any, {
+                damping: 20,
+                stiffness: 90,
+                mass: 0.8,
+            }),
         };
     });
 
@@ -67,7 +108,7 @@ const RoundCellComponent: React.FC<RoundCellProps> = ({
                     zIndex,
                 },
                 positionStyle,
-                animatedStyle,
+                selectionStyle,
             ] as any}
         >
             <Pressable
@@ -109,6 +150,8 @@ export default memo(RoundCellComponent, (prevProps, nextProps) => {
         prevProps.left === nextProps.left &&
         prevProps.x === nextProps.x &&
         prevProps.y === nextProps.y &&
-        prevProps.selected === nextProps.selected
+        prevProps.selected === nextProps.selected &&
+        prevProps.isRemoving === nextProps.isRemoving &&
+        prevProps.backgroundColor === nextProps.backgroundColor
     );
 });

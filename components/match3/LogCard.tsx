@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderRadius: 10,
         padding: 15,
-        maxHeight: 300,
+        height: 300,
         elevation: 4,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     logScroll: {
-        maxHeight: 250,
+        flex: 1,
     },
     logText: {
         fontSize: 12,
