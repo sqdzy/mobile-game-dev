@@ -42,31 +42,32 @@ export default class GridStore {
             (newMatches: Match[]) => {
                 const matches = newMatches.filter(x => !this.oldMatches.includes(x));
                 matches.forEach(match => {
+                    // Задержка для логирования после анимации
                     setTimeout(
                         () => { this.rootStore.messageStore.addMatch(match); },
-                        400
+                        500
                     );
                     if (match.suite === 2) {
                         setTimeout(
                             () => { this.rootStore.statStore.addMatch3(); },
-                            400
+                            500
                         );
                     }
                     if (match.suite === 3) {
                         setTimeout(
                             () => { this.rootStore.statStore.addMatch4(); },
-                            400
+                            500
                         );
                     }
                     if (match.suite === 4) {
                         setTimeout(
                             () => { this.rootStore.statStore.addMatch5(); },
-                            400
+                            500
                         );
                     }
                     setTimeout(
                         () => { this.rootStore.statStore.addColor(match.color, match.suite + 1); },
-                        400
+                        500
                     );
                 });
                 this.oldMatches = [...newMatches];
@@ -108,19 +109,21 @@ export default class GridStore {
                 this.grid.invertCellsPosition(sc.x, sc.y, x, y);
                 let matches: MatchResult = this.grid.getGridMatch(false);
                 if (matches.cellsToRemove.length === 0) {
+                    // Возврат назад если нет совпадений
                     setTimeout(() => {
                         if (sc !== null) {
                             this.grid.invertCellsPosition(x, y, sc.x, sc.y);
                         }
                         this.grid.canMove = true;
-                    }, 500);
+                    }, 600);
                 } else if (matches.cellsToRemove.length > 0) {
+                    // Задержка перед удалением для анимации
                     setTimeout(() => {
                         this.matches = this.matches.concat(matches.matches);
-                    }, 50);
+                    }, 100);
                     setTimeout(() => {
                         this.removeMatches(matches.cellsToRemove);
-                    }, 400);
+                    }, 500);
                 } else {
                     this.grid.canMove = true;
                 }
@@ -149,19 +152,25 @@ export default class GridStore {
         newCells.forEach(c => {
             this.rootStore.statStore.addColorCount(c.name, 1);
         });
+        // Задержка для анимации падения
         setTimeout(() => {
             this.grid.moveNewCells();
-        }, 100);
+        }, 150);
+        
+        // Проверка комбо после завершения падения
         const newMatches: MatchResult = this.grid.getGridMatch(true);
         if (newMatches.cellsToRemove.length > 0) {
             setTimeout(() => {
                 this.matches = this.matches.concat(newMatches.matches);
-            }, 500);
+            }, 700);
             setTimeout(() => {
                 this.removeMatches(newMatches.cellsToRemove);
-            }, 600);
+            }, 850);
         } else {
-            this.grid.canMove = true;
+            // Даем время для завершения анимации
+            setTimeout(() => {
+                this.grid.canMove = true;
+            }, 400);
         }
     }
 }
