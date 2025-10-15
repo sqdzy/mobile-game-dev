@@ -1,12 +1,17 @@
 import { observer } from 'mobx-react-lite';
-import React, { useContext } from 'react';
+import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { RootStoreContext } from '../../store/RootStore';
+import { useRootStore } from '../../store/RootStore';
+import type { UpgradeSnapshot } from '../../store/UpgradeStore';
 
 const StatsCard: React.FC = () => {
-    const rootStore = useContext(RootStoreContext);
+    const rootStore = useRootStore();
     const { info } = rootStore.statStore;
     const { coins, isLoaded } = rootStore.currencyStore;
+    const upgradeStore = rootStore.upgradeStore;
+    const upgradeCatalog: UpgradeSnapshot[] = upgradeStore.catalog;
+    const { coinRewardMultiplier, comboBonusCoins } = upgradeStore;
+    const purchasedUpgrades = upgradeCatalog.filter((upgrade: UpgradeSnapshot) => upgrade.level > 0);
 
     return (
         <View style={styles.container}>
@@ -14,6 +19,8 @@ const StatsCard: React.FC = () => {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Wallet</Text>
                     <Text style={styles.statText}>Coins: {isLoaded ? coins : '...'}</Text>
+                    <Text style={styles.statText}>Coin boost: x{coinRewardMultiplier.toFixed(2)}</Text>
+                    <Text style={styles.statText}>Combo bonus: +{comboBonusCoins} coins</Text>
                 </View>
 
                 <View style={styles.section}>
@@ -37,6 +44,19 @@ const StatsCard: React.FC = () => {
                     <Text style={styles.statText}>Purple: {info.purple}</Text>
                     <Text style={styles.statText}>Amber: {info.amber}</Text>
                     <Text style={styles.statText}>Grey: {info.grey}</Text>
+                </View>
+
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Upgrades</Text>
+                    {purchasedUpgrades.length === 0 ? (
+                        <Text style={styles.statText}>Еще нет активных улучшений</Text>
+                    ) : (
+                        purchasedUpgrades.map((upgrade: UpgradeSnapshot) => (
+                            <Text key={upgrade.id} style={styles.statText}>
+                                {upgrade.title}: Lv.{upgrade.level}
+                            </Text>
+                        ))
+                    )}
                 </View>
             </ScrollView>
         </View>

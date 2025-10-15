@@ -57,7 +57,11 @@ export default class CurrencyStore {
     calculateReward(match: Match): number {
         const base = Math.max(3, match.suite + 1);
         const comboBonus = match.isCombo ? base : 0;
-        return base + comboBonus;
+        const upgradeStore = this.rootStore.upgradeStore;
+        const multiplier = upgradeStore ? upgradeStore.coinRewardMultiplier : 1;
+        const comboFlat = match.isCombo && upgradeStore ? upgradeStore.comboBonusCoins : 0;
+        const total = (base + comboBonus + comboFlat) * multiplier;
+        return Math.max(1, Math.round(total));
     }
 
     async addCoins(amount: number) {
@@ -80,5 +84,27 @@ export default class CurrencyStore {
     async rewardMatch(match: Match) {
         const reward = this.calculateReward(match);
         await this.addCoins(reward);
+    }
+
+    async spendCoins(amount: number): Promise<boolean> {
+        if (!Number.isFinite(amount) || amount <= 0) {
+            return false;
+        }
+
+        await this.ensureLoaded();
+
+        if (this.coins < amount) {
+            return false;
+        }
+
+        const decrement = Math.floor(amount);
+        const nextValue = Math.max(0, this.coins - decrement);
+
+        runInAction(() => {
+            this.coins = nextValue;
+        });
+
+        await this.persist(nextValue);
+        return true;
     }
 }

@@ -1,14 +1,14 @@
 import { observer } from 'mobx-react-lite';
-import React, { useContext } from 'react';
+import React from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
-import { RootStoreContext } from '../../store/RootStore';
+import { useRootStore } from '../../store/RootStore';
 import RoundCell from './RoundCell';
 
 const { width: SCREEN_W } = Dimensions.get('window');
 const GRID_SIZE = Math.min(SCREEN_W * 0.9, 400);
 
 const GameGrid: React.FC = () => {
-    const rootStore = useContext(RootStoreContext);
+    const rootStore = useRootStore();
     const { info, select } = rootStore.gridStore;
 
     return (

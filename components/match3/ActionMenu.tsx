@@ -1,15 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useContext, useState } from 'react';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useGameSessionContext } from '../../contexts/GameSessionContext';
-import { RootStoreContext } from '../../store/RootStore';
+import { useRootStore } from '../../store/RootStore';
 import SessionHistory from './SessionHistory';
 
 const ActionMenu: React.FC = () => {
-    const rootStore = useContext(RootStoreContext);
+    const rootStore = useRootStore();
     const { reset } = rootStore.gridStore;
     const { startNewSession } = useGameSessionContext();
     const [showHistory, setShowHistory] = useState(false);
+    const router = useRouter();
 
     const handleReset = async () => {
         reset();
@@ -41,10 +43,14 @@ const ActionMenu: React.FC = () => {
                         <Ionicons name="time-outline" size={24} color="#fff" />
                     </Pressable>
                     <Pressable
-                        style={[styles.button, styles.buttonDisabled]}
-                        disabled={true}
+                        onPress={() => router.push('/(tabs)/explore')}
+                        style={({ pressed }) => [
+                            styles.button,
+                            styles.buttonTycoon,
+                            pressed && styles.buttonPressed
+                        ]}
                     >
-                        <Ionicons name="bulb" size={24} color="#999" />
+                        <Ionicons name="storefront-outline" size={24} color="#fff" />
                     </Pressable>
                 </View>
             </View>
@@ -112,8 +118,8 @@ const styles = StyleSheet.create({
         opacity: 0.7,
         elevation: 1,
     },
-    buttonDisabled: {
-        backgroundColor: '#e0e0e0',
+    buttonTycoon: {
+        backgroundColor: '#34A853',
     },
     modalContainer: {
         flex: 1,
