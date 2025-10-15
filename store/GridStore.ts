@@ -69,6 +69,10 @@ export default class GridStore {
                         () => { this.rootStore.statStore.addColor(match.color, match.suite + 1); },
                         500
                     );
+                    setTimeout(
+                        () => { void this.rootStore.currencyStore.rewardMatch(match); },
+                        500
+                    );
                 });
                 this.oldMatches = [...newMatches];
             }

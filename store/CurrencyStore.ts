@@ -1,0 +1,84 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { makeObservable, observable, runInAction } from 'mobx';
+import Match from '../domain/Match';
+import type { RootStore } from './RootStore';
+
+const COINS_KEY = 'player_wallet_coins';
+
+export default class CurrencyStore {
+    private rootStore: RootStore;
+    private loadPromise: Promise<void> | null = null;
+    coins: number = 0;
+    isLoaded: boolean = false;
+
+    constructor(rootStore: RootStore) {
+        this.rootStore = rootStore;
+
+        makeObservable(this, {
+            coins: observable,
+            isLoaded: observable,
+        });
+
+        this.loadPromise = this.loadCoins();
+    }
+
+    private async ensureLoaded() {
+        if (!this.isLoaded && this.loadPromise) {
+            await this.loadPromise;
+        }
+    }
+
+    private async persist(value: number) {
+        try {
+            await AsyncStorage.setItem(COINS_KEY, JSON.stringify(value));
+        } catch (error) {
+            console.error('Failed to persist coins balance', error);
+        }
+    }
+
+    async loadCoins() {
+        try {
+            const serialized = await AsyncStorage.getItem(COINS_KEY);
+            const parsed = serialized !== null ? JSON.parse(serialized) : 0;
+            const safeValue = typeof parsed === 'number' && Number.isFinite(parsed) ? parsed : 0;
+            runInAction(() => {
+                this.coins = Math.max(0, Math.floor(safeValue));
+                this.isLoaded = true;
+            });
+        } catch (error) {
+            console.error('Failed to load coins balance', error);
+            runInAction(() => {
+                this.coins = 0;
+                this.isLoaded = true;
+            });
+        }
+    }
+
+    calculateReward(match: Match): number {
+        const base = Math.max(3, match.suite + 1);
+        const comboBonus = match.isCombo ? base : 0;
+        return base + comboBonus;
+    }
+
+    async addCoins(amount: number) {
+        if (!Number.isFinite(amount) || amount <= 0) {
+            return;
+        }
+
+        await this.ensureLoaded();
+
+        const increment = Math.floor(amount);
+        const nextValue = this.coins + increment;
+
+        runInAction(() => {
+            this.coins = nextValue;
+        });
+
+        await this.persist(nextValue);
+    }
+
+    async rewardMatch(match: Match) {
+        const reward = this.calculateReward(match);
+        await this.addCoins(reward);
+    }
+}

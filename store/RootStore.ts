@@ -1,4 +1,5 @@
 import { createContext } from 'react';
+import CurrencyStore from "./CurrencyStore";
 import GridStore from "./GridStore";
 import MessageStore from "./MessageStore";
 import StatStore from "./StatStore";
@@ -7,8 +8,10 @@ export class RootStore {
     gridStore: GridStore;
     messageStore: MessageStore;
     statStore: StatStore;
+    currencyStore: CurrencyStore;
     
     constructor() {
+        this.currencyStore = new CurrencyStore(this);
         this.messageStore = new MessageStore(this);
         this.statStore = new StatStore(this);
         this.gridStore = new GridStore(this);

@@ -51,6 +51,7 @@ const SessionHistory: React.FC = () => {
                         <Text style={styles.statItem}>Match-3: {currentSession.stats.match3}</Text>
                         <Text style={styles.statItem}>Match-4: {currentSession.stats.match4}</Text>
                         <Text style={styles.statItem}>Match-5: {currentSession.stats.match5}</Text>
+                        <Text style={styles.statItem}>Coins: {currentSession.stats.coins}</Text>
                     </View>
                     <Text style={styles.messagesCount}>
                         Сообщений: {currentSession.messages.length}
@@ -83,6 +84,7 @@ const SessionHistory: React.FC = () => {
                                 <Text style={styles.statItem}>
                                     Всего: {session.stats.totalMatches}
                                 </Text>
+                                <Text style={styles.statItem}>Coins: {session.stats.coins}</Text>
                             </View>
                             <Text style={styles.messagesCount}>
                                 Сообщений: {session.messages.length}

@@ -33,12 +33,14 @@ export default function Match3Game() {
         match4: stats.match4,
         match5: stats.match5,
         totalMatches: stats.match3 + stats.match4 + stats.match5,
+        coins: rootStore.currencyStore.coins,
       });
     }
   }, [
     rootStore.statStore.info.match3,
     rootStore.statStore.info.match4,
     rootStore.statStore.info.match5,
+    rootStore.currencyStore.coins,
   ]);
 
   return (

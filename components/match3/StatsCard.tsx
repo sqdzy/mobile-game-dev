@@ -6,10 +6,16 @@ import { RootStoreContext } from '../../store/RootStore';
 const StatsCard: React.FC = () => {
     const rootStore = useContext(RootStoreContext);
     const { info } = rootStore.statStore;
+    const { coins, isLoaded } = rootStore.currencyStore;
 
     return (
         <View style={styles.container}>
             <ScrollView showsVerticalScrollIndicator={false}>
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Wallet</Text>
+                    <Text style={styles.statText}>Coins: {isLoaded ? coins : '...'}</Text>
+                </View>
+
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Puzzle</Text>
                     <Text style={styles.statText}>Blue count: {info.blueCount}</Text>
