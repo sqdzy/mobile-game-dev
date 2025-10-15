@@ -1,4 +1,4 @@
-import { action, computed, makeObservable, observable, reaction } from "mobx";
+import { action, computed, makeObservable, observable, reaction, runInAction } from "mobx";
 import Grid, { MatchResult } from "../domain/Grid";
 import Match from "../domain/Match";
 import type { RootStore } from "./RootStore";
@@ -111,24 +111,32 @@ export default class GridStore {
                 if (matches.cellsToRemove.length === 0) {
                     // Возврат назад если нет совпадений
                     setTimeout(() => {
-                        if (sc !== null) {
-                            this.grid.invertCellsPosition(x, y, sc.x, sc.y);
-                        }
-                        this.grid.canMove = true;
+                        runInAction(() => {
+                            if (sc !== null) {
+                                this.grid.invertCellsPosition(x, y, sc.x, sc.y);
+                            }
+                            this.grid.canMove = true;
+                        });
                     }, 600);
                 } else if (matches.cellsToRemove.length > 0) {
                     // Задержка перед удалением для анимации
                     setTimeout(() => {
-                        this.matches = this.matches.concat(matches.matches);
+                        runInAction(() => {
+                            this.matches = this.matches.concat(matches.matches);
+                        });
                     }, 100);
                     setTimeout(() => {
                         this.removeMatches(matches.cellsToRemove);
                     }, 500);
                 } else {
-                    this.grid.canMove = true;
+                    runInAction(() => {
+                        this.grid.canMove = true;
+                    });
                 }
             } else {
-                this.grid.canMove = true;
+                runInAction(() => {
+                    this.grid.canMove = true;
+                });
             }
         }
     };
@@ -154,14 +162,18 @@ export default class GridStore {
         });
         // Задержка для анимации падения
         setTimeout(() => {
-            this.grid.moveNewCells();
+            runInAction(() => {
+                this.grid.moveNewCells();
+            });
         }, 150);
         
         // Проверка комбо после завершения падения
         const newMatches: MatchResult = this.grid.getGridMatch(true);
         if (newMatches.cellsToRemove.length > 0) {
             setTimeout(() => {
-                this.matches = this.matches.concat(newMatches.matches);
+                runInAction(() => {
+                    this.matches = this.matches.concat(newMatches.matches);
+                });
             }, 700);
             setTimeout(() => {
                 this.removeMatches(newMatches.cellsToRemove);
@@ -169,7 +181,9 @@ export default class GridStore {
         } else {
             // Даем время для завершения анимации
             setTimeout(() => {
-                this.grid.canMove = true;
+                runInAction(() => {
+                    this.grid.canMove = true;
+                });
             }, 400);
         }
     }
