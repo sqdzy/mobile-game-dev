@@ -3,7 +3,7 @@ import React from 'react';
 import { Platform } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+import { MedievalIcon } from '@/components/ui/MedievalIcon';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -29,15 +29,19 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Match-3',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="square.grid.3x3.fill" color={color} />,
+          title: 'Поле',
+          tabBarIcon: ({ color }) => (
+            <MedievalIcon name="grid-sigil" size={30} color={color} accentColor="#f3d7a3" />
+          ),
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'About',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="info.circle.fill" color={color} />,
+          title: 'Улучшения',
+          tabBarIcon: ({ color }) => (
+            <MedievalIcon name="upgrade-scroll" size={30} color={color} accentColor="#6b3f1a" />
+          ),
         }}
       />
     </Tabs>

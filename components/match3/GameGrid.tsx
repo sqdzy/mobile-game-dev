@@ -1,14 +1,14 @@
 import { observer } from 'mobx-react-lite';
-import React, { useContext } from 'react';
+import React from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
-import { RootStoreContext } from '../../store/RootStore';
+import { useRootStore } from '../../store/RootStore';
 import RoundCell from './RoundCell';
 
 const { width: SCREEN_W } = Dimensions.get('window');
 const GRID_SIZE = Math.min(SCREEN_W * 0.9, 400);
 
 const GameGrid: React.FC = () => {
-    const rootStore = useContext(RootStoreContext);
+    const rootStore = useRootStore();
     const { info, select } = rootStore.gridStore;
 
     return (
@@ -48,13 +48,13 @@ const styles = StyleSheet.create({
     },
     gridContainer: {
         position: 'relative',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#1f120a',
         borderRadius: 10,
         overflow: 'hidden',
         elevation: 4,
-        shadowColor: '#000',
+        shadowColor: '#1a0f06',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
+        shadowOpacity: 0.3,
         shadowRadius: 3.84,
     },
 });

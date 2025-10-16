@@ -11,12 +11,47 @@ export interface GameSession {
         match4: number;
         match5: number;
         totalMatches: number;
+        coins: number;
     };
 }
 
 const SESSIONS_KEY = 'game_sessions';
 const CURRENT_SESSION_KEY = 'current_session';
 const MAX_SESSIONS = 10; // Максимальное количество сохраненных сессий
+
+const toInt = (value: any) => {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
+        return 0;
+    }
+    return Math.max(0, Math.floor(numeric));
+};
+
+const normalizeSession = (raw: any): GameSession => {
+    const stats = raw?.stats ?? {};
+    const match3 = toInt(stats.match3);
+    const match4 = toInt(stats.match4);
+    const match5 = toInt(stats.match5);
+    const coins = toInt(stats.coins);
+    const storedTotal = Number(stats.totalMatches);
+    const totalMatches = Number.isFinite(storedTotal)
+        ? Math.max(0, Math.floor(storedTotal))
+        : match3 + match4 + match5;
+
+    return {
+        id: String(raw?.id ?? Date.now().toString()),
+        startTime: raw?.startTime ?? new Date().toISOString(),
+        endTime: raw?.endTime,
+        messages: Array.isArray(raw?.messages) ? raw.messages : [],
+        stats: {
+            match3,
+            match4,
+            match5,
+            totalMatches,
+            coins,
+        },
+    };
+};
 
 /**
  * Хук для управления игровыми сессиями
@@ -38,7 +73,11 @@ export function useGameSession() {
         try {
             const sessionsJson = await AsyncStorage.getItem(SESSIONS_KEY);
             if (sessionsJson) {
-                setSessions(JSON.parse(sessionsJson));
+                const parsed = JSON.parse(sessionsJson);
+                const normalized = Array.isArray(parsed)
+                    ? parsed.map(normalizeSession)
+                    : [];
+                setSessions(normalized);
             }
         } catch (error) {
             console.error('Error loading sessions:', error);
@@ -51,7 +90,7 @@ export function useGameSession() {
             setLoading(true);
             const sessionJson = await AsyncStorage.getItem(CURRENT_SESSION_KEY);
             if (sessionJson) {
-                setCurrentSession(JSON.parse(sessionJson));
+                setCurrentSession(normalizeSession(JSON.parse(sessionJson)));
             } else {
                 // Создаем новую сессию если её нет
                 await startNewSession();
@@ -80,6 +119,7 @@ export function useGameSession() {
                     match4: 0,
                     match5: 0,
                     totalMatches: 0,
+                    coins: 0,
                 },
             };
 

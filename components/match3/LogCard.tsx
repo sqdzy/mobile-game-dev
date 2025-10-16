@@ -1,16 +1,16 @@
 import { observer } from 'mobx-react-lite';
-import React, { useContext } from 'react';
+import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Message from '../../domain/Message';
-import { RootStoreContext } from '../../store/RootStore';
+import { useRootStore } from '../../store/RootStore';
 
 const LogCard: React.FC = () => {
-    const rootStore = useContext(RootStoreContext);
+    const rootStore = useRootStore();
     const { allMessages } = rootStore.messageStore;
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Log</Text>
+            <Text style={styles.title}>Летопись</Text>
             <ScrollView style={styles.logScroll} showsVerticalScrollIndicator={true}>
                 {allMessages.map((m: Message) => (
                     <Text key={m.id} style={styles.logText}>
@@ -24,12 +24,12 @@ const LogCard: React.FC = () => {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#fff',
+        backgroundColor: '#2f1f13',
         borderRadius: 10,
         padding: 15,
         height: 300,
         elevation: 4,
-        shadowColor: '#000',
+        shadowColor: '#1a0f06',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
@@ -38,14 +38,14 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 10,
-        color: '#333',
+        color: '#fbead4',
     },
     logScroll: {
         flex: 1,
     },
     logText: {
         fontSize: 12,
-        color: '#666',
+        color: '#e4cfac',
         marginBottom: 4,
     },
 });
