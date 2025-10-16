@@ -102,4 +102,4 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     },
 ];
 
-export const PURCHASE_SOUND_URL = 'https://cdn.pixabay.com/download/audio/2021/08/04/audio_0df07bd60c.mp3?filename=coin-collect-1-191977.mp3';
+export const PURCHASE_SOUND_URL = 'https://cdn.discordapp.com/attachments/1166081541412237426/1428187046156963982/write-me-some-light-music-for-the-medieval-tycoon-game-on-the-background_101625.mp3?ex=68f19656&is=68f044d6&hm=ad8a9789d357ad6de9c14068b68066193e0103b599247d97becbcfe7769031c5&';

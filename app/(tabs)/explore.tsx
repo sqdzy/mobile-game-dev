@@ -168,7 +168,9 @@ const UpgradeHallScreen: React.FC = () => {
           </View>
           <View style={styles.upgradeContent}>
             <View style={styles.upgradeHeader}>
-              <Text style={styles.upgradeTitle}>{upgrade.title}</Text>
+              <Text style={styles.upgradeTitle} numberOfLines={2}>
+                {upgrade.title}
+              </Text>
               <View style={styles.levelBadge}>
                 <Text style={styles.levelText}>Ур. {upgrade.level}</Text>
               </View>
@@ -385,19 +387,24 @@ const styles = StyleSheet.create({
   },
   upgradeHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+    gap: 8,
   },
   upgradeTitle: {
+    flex: 1,
     fontSize: 18,
     fontWeight: 'bold',
     color: '#fbead4',
+    flexWrap: 'wrap',
   },
   levelBadge: {
     backgroundColor: '#3b2717',
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 4,
+    alignSelf: 'flex-start',
+    marginTop: 2,
   },
   levelText: {
     fontSize: 12,
