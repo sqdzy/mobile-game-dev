@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { action, computed, makeObservable, observable, ObservableMap, runInAction } from 'mobx';
-import { PURCHASE_SOUND_URL, UPGRADE_DEFINITIONS, UpgradeDefinition, UpgradeId } from '../constants/Upgrades';
+import { PURCHASE_SOUND, UPGRADE_DEFINITIONS, UpgradeDefinition, UpgradeId } from '../constants/Upgrades';
 import type { RootStore } from './RootStore';
 
 const STORAGE_KEY = 'player_upgrade_levels_v1';
@@ -150,8 +150,8 @@ export default class UpgradeStore {
         return 1 + Math.floor(level / 2);
     }
 
-    get purchaseSoundUrl(): string {
-        return PURCHASE_SOUND_URL;
+    get purchaseSound(): number {
+        return PURCHASE_SOUND;
     }
 
     private getDefinition(id: UpgradeId): UpgradeDefinition | undefined {
