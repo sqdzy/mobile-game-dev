@@ -1,89 +1,42 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useGameSessionContext } from '../../contexts/GameSessionContext';
-import { useRootStore } from '../../store/RootStore';
-import SessionHistory from './SessionHistory';
+import React from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { MedievalIcon } from '../ui/MedievalIcon';
 
 const ActionMenu: React.FC = () => {
-    const rootStore = useRootStore();
-    const { reset } = rootStore.gridStore;
-    const { startNewSession } = useGameSessionContext();
-    const [showHistory, setShowHistory] = useState(false);
     const router = useRouter();
 
-    const handleReset = async () => {
-        reset();
-        await startNewSession();
-    };
-
     return (
-        <>
-            <View style={styles.container}>
-                <Text style={styles.title}>Actions</Text>
-                <View style={styles.buttonContainer}>
-                    <Pressable
-                        onPress={handleReset}
-                        style={({ pressed }) => [
-                            styles.button,
-                            pressed && styles.buttonPressed
-                        ]}
-                    >
-                        <Ionicons name="refresh" size={24} color="#fff" />
-                    </Pressable>
-                    <Pressable
-                        onPress={() => setShowHistory(true)}
-                        style={({ pressed }) => [
-                            styles.button,
-                            styles.buttonHistory,
-                            pressed && styles.buttonPressed
-                        ]}
-                    >
-                        <Ionicons name="time-outline" size={24} color="#fff" />
-                    </Pressable>
-                    <Pressable
-                        onPress={() => router.push('/(tabs)/explore')}
-                        style={({ pressed }) => [
-                            styles.button,
-                            styles.buttonTycoon,
-                            pressed && styles.buttonPressed
-                        ]}
-                    >
-                        <Ionicons name="storefront-outline" size={24} color="#fff" />
-                    </Pressable>
-                </View>
-            </View>
-
-            <Modal
-                visible={showHistory}
-                animationType="slide"
-                onRequestClose={() => setShowHistory(false)}
+        <View style={styles.container}>
+            <Text style={styles.title}>Приказы</Text>
+            <Pressable
+                onPress={() => router.push('/(tabs)/explore')}
+                style={({ pressed }) => [
+                    styles.commandButton,
+                    pressed && styles.commandButtonPressed,
+                ]}
             >
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalHeader}>
-                        <Pressable 
-                            onPress={() => setShowHistory(false)}
-                            style={styles.closeButton}
-                        >
-                            <Ionicons name="close" size={28} color="#333" />
-                        </Pressable>
-                    </View>
-                    <SessionHistory />
+                <View style={styles.iconBadge}>
+                    <MedievalIcon name="upgrade-scroll" size={32} color="#f8d9a0" accentColor="#7b4f1d" />
                 </View>
-            </Modal>
-        </>
+                <View style={styles.commandCopy}>
+                    <Text style={styles.commandTitle}>Башня улучшений</Text>
+                    <Text style={styles.commandSubtitle}>Откройте чертоги мастеров, чтобы усилить союзников и казну.</Text>
+                </View>
+                <Text style={styles.commandArrow}>&gt;</Text>
+            </Pressable>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#fff',
+        backgroundColor: '#2f1f13',
         borderRadius: 10,
         padding: 15,
         marginBottom: 10,
         elevation: 4,
-        shadowColor: '#000',
+        shadowColor: '#1a0f06',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
@@ -92,49 +45,50 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 10,
-        color: '#333',
+        color: '#fbead4',
     },
-    buttonContainer: {
+    commandButton: {
         flexDirection: 'row',
-        gap: 10,
-    },
-    button: {
-        width: 56,
-        height: 56,
-        borderRadius: 28,
-        backgroundColor: '#2196F3',
-        justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: '#5c3412',
+        borderRadius: 12,
+        padding: 14,
+        gap: 14,
         elevation: 2,
-        shadowColor: '#000',
+        shadowColor: '#1a0f06',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.2,
         shadowRadius: 1.41,
     },
-    buttonHistory: {
-        backgroundColor: '#9C27B0',
-    },
-    buttonPressed: {
-        opacity: 0.7,
+    commandButtonPressed: {
+        opacity: 0.88,
         elevation: 1,
     },
-    buttonTycoon: {
-        backgroundColor: '#34A853',
+    iconBadge: {
+        width: 54,
+        height: 54,
+        borderRadius: 27,
+        backgroundColor: '#3f2410',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    modalContainer: {
+    commandCopy: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        gap: 4,
     },
-    modalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        padding: 15,
-        backgroundColor: '#fff',
-        borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0',
+    commandTitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#fbead4',
     },
-    closeButton: {
-        padding: 5,
+    commandSubtitle: {
+        fontSize: 13,
+        color: '#d9c3a0',
+    },
+    commandArrow: {
+        fontSize: 20,
+        color: '#fbead4',
+        fontWeight: '700',
     },
 });
 

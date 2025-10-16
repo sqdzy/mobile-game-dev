@@ -2,9 +2,7 @@ import ActionMenu from '@/components/match3/ActionMenu';
 import GameGrid from '@/components/match3/GameGrid';
 import LogCard from '@/components/match3/LogCard';
 import StatsCard from '@/components/match3/StatsCard';
-import { useGameSessionContext } from '@/contexts/GameSessionContext';
 import { useRootStore } from '@/store/RootStore';
-import { reaction } from 'mobx';
 import React, { useEffect } from 'react';
 import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,41 +12,10 @@ const isTablet = SCREEN_W > 768;
 
 export default function Match3Game() {
   const rootStore = useRootStore();
-  const { currentSession, addMessage, updateStats } = useGameSessionContext();
 
-  // Синхронизация логов и статистики с сессией
   useEffect(() => {
-    if (currentSession) {
-      // Логируем начало игры
-      addMessage('Game started');
-    }
-  }, [currentSession?.id]);
-
-  // Отслеживание изменений в стате для сохранения в сессию
-  useEffect(() => {
-    if (!currentSession) {
-      return;
-    }
-
-    const dispose = reaction(
-      () => {
-        const stats = rootStore.statStore.info;
-        return {
-          match3: stats.match3,
-          match4: stats.match4,
-          match5: stats.match5,
-          totalMatches: stats.match3 + stats.match4 + stats.match5,
-          coins: rootStore.currencyStore.coins,
-        };
-      },
-      snapshot => {
-        updateStats(snapshot);
-      },
-      { fireImmediately: true }
-    );
-
-    return () => dispose();
-  }, [currentSession?.id, rootStore, updateStats]);
+    rootStore.messageStore.add('Герольд объявляет начало битвы.');
+  }, [rootStore]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -85,11 +52,11 @@ export default function Match3Game() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#120b06',
   },
   scrollContent: {
     flexGrow: 1,
-    padding: 10,
+    padding: 12,
   },
   tabletLayout: {
     flexDirection: 'row',
@@ -106,6 +73,6 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   sidePanel: {
-    gap: 10,
+    gap: 12,
   },
 });

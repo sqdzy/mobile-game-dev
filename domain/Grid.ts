@@ -26,6 +26,12 @@ export interface SimpleCell {
     y: number;
 }
 
+export interface CellSnapshot {
+    x: number;
+    y: number;
+    color: string;
+}
+
 export default class Grid {
     private squareSize: number;
     canMove: boolean = true;
@@ -33,7 +39,7 @@ export default class Grid {
     selectedCell: Cell | null = null;
     forInitGridStat: ForInitGrid = { x: [], y: [] };
 
-    constructor(squareSize: number) {
+    constructor(squareSize: number, snapshots?: CellSnapshot[]) {
         this.squareSize = squareSize;
         
         for (let i: number = 0; i < squareSize; i++) {
@@ -54,11 +60,18 @@ export default class Grid {
                 grey: 0,
             };
         }
-        
-        for (let x: number = 0; x < squareSize; x++) {
-            for (let y: number = 0; y < squareSize; y++) {
-                const cell = this.getNextColor(x, y, true);
+
+        if (snapshots && snapshots.length === squareSize * squareSize) {
+            snapshots.forEach(({ x, y, color }) => {
+                const cell = new Cell(x, y, this.squareSize, color);
                 this.cells.push(cell);
+            });
+        } else {
+            for (let x: number = 0; x < squareSize; x++) {
+                for (let y: number = 0; y < squareSize; y++) {
+                    const cell = this.getNextColor(x, y, true);
+                    this.cells.push(cell);
+                }
             }
         }
 

@@ -5,7 +5,6 @@ import { StatusBar } from 'expo-status-bar';
 import { useMemo } from 'react';
 import 'react-native-reanimated';
 
-import { GameSessionProvider } from '@/contexts/GameSessionContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { RootStore, RootStoreContext } from '@/store/RootStore';
 
@@ -23,15 +22,13 @@ export default function RootLayout() {
 
   return (
     <RootStoreContext.Provider value={rootStore}>
-      <GameSessionProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </GameSessionProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        <StatusBar style="auto" />
+      </ThemeProvider>
     </RootStoreContext.Provider>
   );
 }

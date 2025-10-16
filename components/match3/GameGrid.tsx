@@ -48,13 +48,13 @@ const styles = StyleSheet.create({
     },
     gridContainer: {
         position: 'relative',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#1f120a',
         borderRadius: 10,
         overflow: 'hidden',
         elevation: 4,
-        shadowColor: '#000',
+        shadowColor: '#1a0f06',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
+        shadowOpacity: 0.3,
         shadowRadius: 3.84,
     },
 });

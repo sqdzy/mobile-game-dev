@@ -58,9 +58,10 @@ export default class CurrencyStore {
         const base = Math.max(3, match.suite + 1);
         const comboBonus = match.isCombo ? base : 0;
         const upgradeStore = this.rootStore.upgradeStore;
+        const flatBonus = upgradeStore ? upgradeStore.flatRewardBonus : 0;
         const multiplier = upgradeStore ? upgradeStore.coinRewardMultiplier : 1;
         const comboFlat = match.isCombo && upgradeStore ? upgradeStore.comboBonusCoins : 0;
-        const total = (base + comboBonus + comboFlat) * multiplier;
+        const total = (base + comboBonus + comboFlat + flatBonus) * multiplier;
         return Math.max(1, Math.round(total));
     }
 

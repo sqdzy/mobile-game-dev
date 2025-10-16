@@ -24,6 +24,7 @@ interface AnimationTimings {
     comboResolveDelay: number;
     unlockDelay: number;
     revertDelay: number;
+    blastDelay: number;
 }
 
 export default class UpgradeStore {
@@ -43,6 +44,11 @@ export default class UpgradeStore {
             catalog: computed,
             coinRewardMultiplier: computed,
             comboBonusCoins: computed,
+            flatRewardBonus: computed,
+            blastChance: computed,
+            upgradeDiscount: computed,
+            animationReduction: computed,
+            blastRadius: computed,
             animationTimings: computed,
             loadState: action.bound,
         });
@@ -64,39 +70,84 @@ export default class UpgradeStore {
     }
 
     get coinRewardMultiplier(): number {
-        const def = this.getDefinition('coin-magnet');
+        const def = this.getDefinition('royal-ledger');
         if (!def) {
             return 1;
         }
-        const level = this.getLevel('coin-magnet');
+        const level = this.getLevel('royal-ledger');
         return 1 + def.valuePerLevel * level;
     }
 
     get comboBonusCoins(): number {
-        const def = this.getDefinition('combo-charger');
+        const def = this.getDefinition('battle-horns');
         if (!def) {
             return 0;
         }
-        const level = this.getLevel('combo-charger');
+        const level = this.getLevel('battle-horns');
+        return level * def.valuePerLevel;
+    }
+
+    get flatRewardBonus(): number {
+        const def = this.getDefinition('guild-patrons');
+        if (!def) {
+            return 0;
+        }
+        const level = this.getLevel('guild-patrons');
+        return level * def.valuePerLevel;
+    }
+
+    get blastChance(): number {
+        const def = this.getDefinition('dragon-siege');
+        if (!def) {
+            return 0;
+        }
+        const level = this.getLevel('dragon-siege');
+        const chance = level * def.valuePerLevel;
+        return Math.min(0.5, chance);
+    }
+
+    get upgradeDiscount(): number {
+        const def = this.getDefinition('architects-council');
+        if (!def) {
+            return 0;
+        }
+        const level = this.getLevel('architects-council');
+        const total = level * def.valuePerLevel;
+        return Math.min(0.6, total);
+    }
+
+    get animationReduction(): number {
+        const def = this.getDefinition('chronomancer-hourglass');
+        if (!def) {
+            return 0;
+        }
+        const level = this.getLevel('chronomancer-hourglass');
         return level * def.valuePerLevel;
     }
 
     get animationTimings(): AnimationTimings {
-        const def = this.getDefinition('quantum-refinery');
-        const level = def ? this.getLevel('quantum-refinery') : 0;
-        const reduction = (def?.valuePerLevel ?? 0) * level;
+        const reduction = this.animationReduction;
 
         const clamp = (base: number, min: number = 80) => Math.max(min, base - reduction);
 
         return {
-            highlightDelay: clamp(100, 60),
-            resolveDelay: clamp(500, 280),
-            dropDelay: clamp(150, 80),
-            comboQueueDelay: clamp(700, 400),
-            comboResolveDelay: clamp(850, 520),
-            unlockDelay: clamp(400, 220),
-            revertDelay: clamp(600, 320),
+            highlightDelay: clamp(110, 70),
+            resolveDelay: clamp(520, 300),
+            dropDelay: clamp(180, 90),
+            comboQueueDelay: clamp(720, 420),
+            comboResolveDelay: clamp(880, 540),
+            unlockDelay: clamp(420, 240),
+            revertDelay: clamp(620, 340),
+            blastDelay: clamp(560, 320),
         };
+    }
+
+    get blastRadius(): number {
+        const level = this.getLevel('dragon-siege');
+        if (level <= 0) {
+            return 0;
+        }
+        return 1 + Math.floor(level / 2);
     }
 
     get purchaseSoundUrl(): string {
@@ -135,8 +186,9 @@ export default class UpgradeStore {
                 runInAction(() => {
                     (Object.entries(parsed) as [UpgradeId, number][]).forEach(([id, lvl]) => {
                         const sanitized = this.sanitizeLevel(lvl);
-                        if (sanitized > 0) {
-                            this.levelMap.set(id, Math.min(sanitized, this.getDefinition(id)?.maxLevel ?? sanitized));
+                        const definition = this.getDefinition(id);
+                        if (sanitized > 0 && definition) {
+                            this.levelMap.set(id, Math.min(sanitized, definition.maxLevel));
                         }
                     });
                 });
@@ -184,7 +236,9 @@ export default class UpgradeStore {
         }
         const level = this.getLevel(id);
         const cost = def.baseCost * Math.pow(def.costGrowth, level);
-        return Math.max(def.baseCost, Math.round(cost));
+        const discountMultiplier = Math.max(0.4, 1 - this.upgradeDiscount);
+        const adjusted = cost * discountMultiplier;
+        return Math.max(def.baseCost, Math.round(adjusted));
     }
 
     async purchase(id: UpgradeId): Promise<PurchaseResult> {
@@ -215,7 +269,7 @@ export default class UpgradeStore {
 
         await this.persist();
 
-        this.rootStore.messageStore.add(`Upgrade ${def.title} приобретается (уровень ${currentLevel + 1})`);
+        this.rootStore.messageStore.add(`Улучшение «${def.title}» продвигается до уровня ${currentLevel + 1}.`);
 
         return { success: true };
     }
