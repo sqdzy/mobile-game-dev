@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { MedievalIcon, type MedievalIconName } from '@/components/ui/MedievalIcon';
+import { triggerRewardReminderNow } from '@/hooks/useAndroidEnhancements';
 import { useRootStore } from '@/store/RootStore';
 import type { UpgradeSnapshot } from '@/store/UpgradeStore';
 
@@ -15,6 +16,7 @@ const UpgradeHallScreen: React.FC = () => {
   const soundRef = useRef<Audio.Sound | null>(null);
   const [isSoundReady, setSoundReady] = useState(false);
   const [isAudioEnabled, setAudioEnabled] = useState(true);
+  const [isNotificationSending, setNotificationSending] = useState(false);
 
   const upgrades: UpgradeSnapshot[] = upgradeStore.catalog;
   const {
@@ -132,6 +134,26 @@ const UpgradeHallScreen: React.FC = () => {
     }
   };
 
+  const handleTestNotification = async () => {
+    if (isNotificationSending) {
+      return;
+    }
+    setNotificationSending(true);
+    try {
+      const success = await triggerRewardReminderNow();
+      if (success) {
+        setStatus({ tone: 'info', message: 'Напоминание отправлено. Проверьте уведомления устройства.' });
+      } else {
+        setStatus({ tone: 'error', message: 'Нет доступа к уведомлениям. Разрешите их в настройках.' });
+      }
+    } catch (error) {
+      console.error('Failed to trigger notification', error);
+      setStatus({ tone: 'error', message: 'Не удалось отправить уведомление. Проверьте логи.' });
+    } finally {
+      setNotificationSending(false);
+    }
+  };
+
   if (!upgradeStore.isLoaded || !currencyStore.isLoaded) {
     return (
       <View style={styles.loadingContainer}>
@@ -177,6 +199,25 @@ const UpgradeHallScreen: React.FC = () => {
           />
           <Text style={styles.audioToggleText}>
             {isAudioEnabled ? 'Звук: включен' : 'Звук: выключен'}
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={handleTestNotification}
+          disabled={isNotificationSending}
+          style={({ pressed }) => [
+            styles.notificationButton,
+            isNotificationSending && styles.notificationButtonDisabled,
+            pressed && !isNotificationSending ? styles.notificationButtonPressed : null,
+          ]}
+        >
+          <MedievalIcon
+            name="tower"
+            size={24}
+            color="#f8d9a0"
+            accentColor="#3b2717"
+          />
+          <Text style={styles.notificationButtonText}>
+            {isNotificationSending ? 'Отправляем…' : 'Напомнить о наградах'}
           </Text>
         </Pressable>
         <View style={styles.highlightRow}>
@@ -385,6 +426,28 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   audioToggleText: {
+    color: '#fbead4',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  notificationButton: {
+    marginTop: 10,
+    alignSelf: 'flex-start',
+    backgroundColor: '#3b2717',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  notificationButtonPressed: {
+    opacity: 0.85,
+  },
+  notificationButtonDisabled: {
+    opacity: 0.5,
+  },
+  notificationButtonText: {
     color: '#fbead4',
     fontSize: 13,
     fontWeight: '600',
