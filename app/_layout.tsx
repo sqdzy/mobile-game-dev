@@ -5,7 +5,9 @@ import { StatusBar } from 'expo-status-bar';
 import { useMemo } from 'react';
 import 'react-native-reanimated';
 
+import { useAndroidEnhancements } from '@/hooks/useAndroidEnhancements';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import '@/notifications/handler';
 import { RootStore, RootStoreContext } from '@/store/RootStore';
 
 export default function RootLayout() {
@@ -14,6 +16,7 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
   const rootStore = useMemo(() => new RootStore(), []);
+  useAndroidEnhancements();
 
   if (!loaded) {
     // Async font loading only occurs in development.
