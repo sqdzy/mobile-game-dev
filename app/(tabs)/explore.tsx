@@ -1,9 +1,11 @@
+import { Asset } from 'expo-asset';
 import { Audio } from 'expo-av';
 import { observer } from 'mobx-react-lite';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { MedievalIcon, type MedievalIconName } from '@/components/ui/MedievalIcon';
+import { triggerRewardReminderNow } from '@/hooks/useAndroidEnhancements';
 import { useRootStore } from '@/store/RootStore';
 import type { UpgradeSnapshot } from '@/store/UpgradeStore';
 
@@ -13,6 +15,8 @@ const UpgradeHallScreen: React.FC = () => {
   const [status, setStatus] = useState<{ tone: 'success' | 'error' | 'info'; message: string } | null>(null);
   const soundRef = useRef<Audio.Sound | null>(null);
   const [isSoundReady, setSoundReady] = useState(false);
+  const [isAudioEnabled, setAudioEnabled] = useState(true);
+  const [isNotificationSending, setNotificationSending] = useState(false);
 
   const upgrades: UpgradeSnapshot[] = upgradeStore.catalog;
   const {
@@ -54,7 +58,13 @@ const UpgradeHallScreen: React.FC = () => {
     let isMounted = true;
     (async () => {
       try {
-        const { sound } = await Audio.Sound.createAsync({ uri: upgradeStore.purchaseSoundUrl });
+        const asset = Asset.fromModule(upgradeStore.purchaseSound);
+        if (!asset.downloaded) {
+          await asset.downloadAsync();
+        }
+        const source = asset.localUri ? { uri: asset.localUri } : upgradeStore.purchaseSound;
+        const { sound } = await Audio.Sound.createAsync(source);
+        await sound.setVolumeAsync(1);
         if (!isMounted) {
           await sound.unloadAsync();
           return;
@@ -73,11 +83,11 @@ const UpgradeHallScreen: React.FC = () => {
         soundRef.current = null;
       }
     };
-  }, [upgradeStore.purchaseSoundUrl]);
+  }, [upgradeStore.purchaseSound]);
 
   const playPurchaseSound = async () => {
     try {
-      if (soundRef.current) {
+      if (soundRef.current && isAudioEnabled) {
         await soundRef.current.replayAsync();
       }
     } catch (error) {
@@ -104,6 +114,44 @@ const UpgradeHallScreen: React.FC = () => {
       message = 'Башня улучшений ещё собирает хроники. Попробуйте чуть позже.';
     }
     setStatus({ tone: 'error', message });
+  };
+
+  const toggleAudio = async () => {
+    const next = !isAudioEnabled;
+    setAudioEnabled(next);
+    if (!soundRef.current) {
+      return;
+    }
+    try {
+      if (next) {
+        await soundRef.current.setPositionAsync(0);
+        await soundRef.current.playAsync();
+      } else {
+        await soundRef.current.stopAsync();
+      }
+    } catch (error) {
+      console.error('Failed to toggle audio', error);
+    }
+  };
+
+  const handleTestNotification = async () => {
+    if (isNotificationSending) {
+      return;
+    }
+    setNotificationSending(true);
+    try {
+      const success = await triggerRewardReminderNow();
+      if (success) {
+        setStatus({ tone: 'info', message: 'Напоминание отправлено. Проверьте уведомления устройства.' });
+      } else {
+        setStatus({ tone: 'error', message: 'Нет доступа к уведомлениям. Разрешите их в настройках.' });
+      }
+    } catch (error) {
+      console.error('Failed to trigger notification', error);
+      setStatus({ tone: 'error', message: 'Не удалось отправить уведомление. Проверьте логи.' });
+    } finally {
+      setNotificationSending(false);
+    }
   };
 
   if (!upgradeStore.isLoaded || !currencyStore.isLoaded) {
@@ -134,6 +182,44 @@ const UpgradeHallScreen: React.FC = () => {
         <Text style={styles.heroSubtitle}>
           Развивайте владения, чтобы увеличить добычу монет, ускорить ритуалы и призвать новых союзников на поле.
         </Text>
+        <Pressable
+          disabled={!isSoundReady}
+          onPress={toggleAudio}
+          style={({ pressed }) => [
+            styles.audioToggle,
+            !isSoundReady && styles.audioToggleDisabled,
+            pressed && isSoundReady ? styles.audioTogglePressed : null,
+          ]}
+        >
+          <MedievalIcon
+            name="horn"
+            size={24}
+            color={isAudioEnabled ? '#f8d9a0' : '#b6946c'}
+            accentColor="#3b2717"
+          />
+          <Text style={styles.audioToggleText}>
+            {isAudioEnabled ? 'Звук: включен' : 'Звук: выключен'}
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={handleTestNotification}
+          disabled={isNotificationSending}
+          style={({ pressed }) => [
+            styles.notificationButton,
+            isNotificationSending && styles.notificationButtonDisabled,
+            pressed && !isNotificationSending ? styles.notificationButtonPressed : null,
+          ]}
+        >
+          <MedievalIcon
+            name="tower"
+            size={24}
+            color="#f8d9a0"
+            accentColor="#3b2717"
+          />
+          <Text style={styles.notificationButtonText}>
+            {isNotificationSending ? 'Отправляем…' : 'Напомнить о наградах'}
+          </Text>
+        </Pressable>
         <View style={styles.highlightRow}>
           {headerHighlights.map(item => (
             <View key={item.key} style={styles.highlightCard}>
@@ -321,6 +407,50 @@ const styles = StyleSheet.create({
     color: '#d2b48c',
     marginTop: 6,
     fontSize: 14,
+  },
+  audioToggle: {
+    marginTop: 12,
+    alignSelf: 'flex-start',
+    backgroundColor: '#3b2717',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  audioTogglePressed: {
+    opacity: 0.85,
+  },
+  audioToggleDisabled: {
+    opacity: 0.5,
+  },
+  audioToggleText: {
+    color: '#fbead4',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  notificationButton: {
+    marginTop: 10,
+    alignSelf: 'flex-start',
+    backgroundColor: '#3b2717',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  notificationButtonPressed: {
+    opacity: 0.85,
+  },
+  notificationButtonDisabled: {
+    opacity: 0.5,
+  },
+  notificationButtonText: {
+    color: '#fbead4',
+    fontSize: 13,
+    fontWeight: '600',
   },
   highlightRow: {
     flexDirection: 'row',
