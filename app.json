@@ -16,7 +16,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.sqdzy.mobiledevgame"
     },
     "web": {
       "bundler": "metro",
@@ -38,7 +39,7 @@
         "expo-notifications",
         {
           "sounds": [
-            "./assets/audio/notification.wav"
+            "./assets/audio/notification.mp3"
           ]
         }
       ]

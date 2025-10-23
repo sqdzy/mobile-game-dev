@@ -8,12 +8,14 @@ import { useEffect } from 'react';
 import { Platform } from 'react-native';
 
 import {
-    REWARD_NOTIFICATION_ACTION,
-    REWARD_NOTIFICATION_CHANNEL_ID,
-    REWARD_NOTIFICATION_DELAY_SECONDS,
-    REWARD_NOTIFICATION_SOUND,
-    SHORTCUT_ID_GRID,
-    SHORTCUT_ID_UPGRADES,
+  REWARD_NOTIFICATION_ACTION,
+  REWARD_NOTIFICATION_CHANNEL_ID,
+  REWARD_NOTIFICATION_DELAY_SECONDS,
+  REWARD_NOTIFICATION_KIND_MANUAL,
+  REWARD_NOTIFICATION_KIND_RECURRING,
+  REWARD_NOTIFICATION_SOUND,
+  SHORTCUT_ID_GRID,
+  SHORTCUT_ID_UPGRADES,
 } from '@/constants/PlatformEnhancements';
 
 type RouterType = ReturnType<typeof useRouter>;
@@ -67,6 +69,14 @@ async function configureNotificationChannel() {
 }
 
 async function scheduleRewardReminder() {
+  const existing = await Notifications.getAllScheduledNotificationsAsync();
+  const hasActiveReminder = existing.some(item =>
+    isRecurringRewardReminder(item as ScheduledNotificationLike)
+  );
+  if (hasActiveReminder) {
+    return;
+  }
+
   const trigger: TimeIntervalTriggerInput =
     Platform.OS === 'android'
       ? ({
@@ -79,16 +89,39 @@ async function scheduleRewardReminder() {
           repeats: true,
         } as TimeIntervalTriggerInput);
 
-  await Notifications.cancelAllScheduledNotificationsAsync();
   await Notifications.scheduleNotificationAsync({
     content: {
       title: 'В казне ждут сокровища',
       body: 'Загляните в Башню улучшений, чтобы забрать награды и усилить отряд.',
       sound: Platform.OS === 'android' ? (IS_EXPO_GO ? 'default' : REWARD_NOTIFICATION_SOUND) : 'default',
-      data: { action: REWARD_NOTIFICATION_ACTION },
+      data: { action: REWARD_NOTIFICATION_ACTION, kind: REWARD_NOTIFICATION_KIND_RECURRING },
     },
     trigger: trigger as Notifications.NotificationTriggerInput,
   });
+}
+
+function isRecurringRewardReminderData(data: Record<string, unknown> | undefined): boolean {
+  return data?.action === REWARD_NOTIFICATION_ACTION && data?.kind === REWARD_NOTIFICATION_KIND_RECURRING;
+}
+
+type ScheduledNotificationLike = {
+  content: Notifications.NotificationContent;
+  trigger: Notifications.NotificationTrigger | null;
+};
+
+function isRecurringRewardReminderTrigger(trigger: ScheduledNotificationLike['trigger']): boolean {
+  if (!trigger || typeof trigger !== 'object') {
+    return false;
+  }
+  if ('type' in trigger && trigger.type === 'timeInterval') {
+    return trigger.repeats === true;
+  }
+  return false;
+}
+
+function isRecurringRewardReminder(notification: ScheduledNotificationLike): boolean {
+  const data = notification.content.data as Record<string, unknown> | undefined;
+  return isRecurringRewardReminderData(data) && isRecurringRewardReminderTrigger(notification.trigger);
 }
 
 async function initialiseQuickActions(router: RouterType) {
@@ -214,7 +247,7 @@ export async function triggerRewardReminderNow(): Promise<boolean> {
         title: 'В казне ждут сокровища',
         body: 'Напоминание: загляните в Башню улучшений и соберите выручку.',
         sound: Platform.OS === 'android' ? (IS_EXPO_GO ? 'default' : REWARD_NOTIFICATION_SOUND) : 'default',
-        data: { action: REWARD_NOTIFICATION_ACTION },
+        data: { action: REWARD_NOTIFICATION_ACTION, kind: REWARD_NOTIFICATION_KIND_MANUAL },
       },
       trigger: null,
     });
