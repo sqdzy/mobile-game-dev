@@ -319,11 +319,32 @@ export default class Grid {
     }
 
     removeMatches(matches: SimpleCell[]): Cell[] {
-        matches.forEach(simpleCell => {
-            this.remove(simpleCell.x, simpleCell.y);
+        if (matches.length === 0) {
+            return [];
+        }
+
+        // Process from bottom to top per column to keep coordinates in sync while we remove cells.
+        const ordered = Array.from(new Map(matches.map(cell => {
+            const key = `${cell.x}:${cell.y}`;
+            return [key, { ...cell }] as const;
+        })).values()).sort((a, b) => {
+            if (a.x === b.x) {
+                return b.y - a.y;
+            }
+            return a.x - b.x;
         });
-        const result = this.fillGrid(matches);
-        return result;
+
+        const removed: SimpleCell[] = [];
+
+        ordered.forEach(simpleCell => {
+            const existing = this.get(simpleCell.x, simpleCell.y);
+            if (existing !== null) {
+                this.remove(simpleCell.x, simpleCell.y);
+                removed.push(simpleCell);
+            }
+        });
+
+        return this.fillGrid(removed);
     }
 
     fillGrid(matches: SimpleCell[]): Cell[] {
