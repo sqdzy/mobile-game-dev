@@ -1,6 +1,8 @@
 import { createContext, useContext } from 'react';
+import AuthStore from "./AuthStore";
 import CurrencyStore from "./CurrencyStore";
 import GridStore from "./GridStore";
+import LeaderboardStore from "./LeaderboardStore";
 import MessageStore from "./MessageStore";
 import StatStore from "./StatStore";
 import UpgradeStore from "./UpgradeStore";
@@ -11,6 +13,8 @@ export class RootStore {
     statStore: StatStore;
     currencyStore: CurrencyStore;
     upgradeStore: UpgradeStore;
+    authStore: AuthStore;
+    leaderboardStore: LeaderboardStore;
     
     constructor() {
         this.upgradeStore = new UpgradeStore(this);
@@ -18,6 +22,8 @@ export class RootStore {
         this.messageStore = new MessageStore(this);
         this.statStore = new StatStore(this);
         this.gridStore = new GridStore(this);
+        this.authStore = new AuthStore(this);
+        this.leaderboardStore = new LeaderboardStore(this);
     }
 }
 

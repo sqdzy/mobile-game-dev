@@ -44,6 +44,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="leaderboard"
+        options={{
+          title: 'Лига героев',
+          tabBarIcon: ({ color }) => (
+            <MedievalIcon name="horn" size={30} color={color} accentColor="#f5c16c" />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

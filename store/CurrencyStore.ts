@@ -80,6 +80,7 @@ export default class CurrencyStore {
         });
 
         await this.persist(nextValue);
+            this.rootStore.authStore?.scheduleSync('coins:add');
     }
 
     async rewardMatch(match: Match) {
@@ -106,6 +107,25 @@ export default class CurrencyStore {
         });
 
         await this.persist(nextValue);
+        this.rootStore.authStore?.scheduleSync('coins:spend');
         return true;
+    }
+
+    setRemoteBalance(value: number) {
+        const safeValue = Math.max(0, Math.floor(value ?? 0));
+        runInAction(() => {
+            this.coins = safeValue;
+            this.isLoaded = true;
+        });
+        void this.persist(safeValue);
+    }
+
+    async resetLocalProgress(): Promise<void> {
+        await this.ensureLoaded();
+        runInAction(() => {
+            this.coins = 0;
+            this.isLoaded = true;
+        });
+        await this.persist(0);
     }
 }

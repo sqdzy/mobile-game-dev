@@ -45,6 +45,7 @@ export default class StatStore {
             addMatch5: action,
             addColor: action,
             addColorCount: action,
+            applyRemoteStats: action,
         });
     }
 
@@ -142,5 +143,28 @@ export default class StatStore {
                 this.greyCount = this.greyCount + count;
                 break;
         }
+    };
+
+    getSnapshot(): Record<string, number> {
+        return { ...this.info };
+    }
+
+    applyRemoteStats = (snapshot: Record<string, number> = {}) => {
+        const next = { ...this.info, ...snapshot };
+        this.blue = next.blue ?? 0;
+        this.red = next.red ?? 0;
+        this.green = next.green ?? 0;
+        this.purple = next.purple ?? 0;
+        this.amber = next.amber ?? 0;
+        this.grey = next.grey ?? 0;
+        this.blueCount = next.blueCount ?? 0;
+        this.redCount = next.redCount ?? 0;
+        this.greenCount = next.greenCount ?? 0;
+        this.purpleCount = next.purpleCount ?? 0;
+        this.amberCount = next.amberCount ?? 0;
+        this.greyCount = next.greyCount ?? 0;
+        this.match3 = next.match3 ?? 0;
+        this.match4 = next.match4 ?? 0;
+        this.match5 = next.match5 ?? 0;
     };
 }

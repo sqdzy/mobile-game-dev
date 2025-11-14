@@ -1,10 +1,15 @@
 import { useRouter } from 'expo-router';
+import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+
+import { useRootStore } from '@/store/RootStore';
 import { MedievalIcon } from '../ui/MedievalIcon';
 
 const ActionMenu: React.FC = () => {
     const router = useRouter();
+    const { authStore } = useRootStore();
+    const isAuthenticated = authStore.isAuthenticated;
 
     return (
         <View style={styles.container}>
@@ -22,6 +27,26 @@ const ActionMenu: React.FC = () => {
                 <View style={styles.commandCopy}>
                     <Text style={styles.commandTitle}>Башня улучшений</Text>
                     <Text style={styles.commandSubtitle}>Откройте чертоги мастеров, чтобы усилить союзников и казну.</Text>
+                </View>
+                <Text style={styles.commandArrow}>&gt;</Text>
+            </Pressable>
+            <Pressable
+                onPress={() => router.push('/(tabs)/leaderboard')}
+                style={({ pressed }) => [
+                    styles.commandButton,
+                    pressed && styles.commandButtonPressed,
+                ]}
+            >
+                <View style={styles.iconBadge}>
+                    <MedievalIcon name="horn" size={32} color="#f8d9a0" accentColor="#f5c16c" />
+                </View>
+                <View style={styles.commandCopy}>
+                    <Text style={styles.commandTitle}>Лига героев</Text>
+                    <Text style={styles.commandSubtitle}>
+                        {isAuthenticated
+                            ? 'Проверьте своё место в хрониках королевства.'
+                            : 'Войдите и синхронизируйте монеты между устройствами.'}
+                    </Text>
                 </View>
                 <Text style={styles.commandArrow}>&gt;</Text>
             </Pressable>
@@ -92,4 +117,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ActionMenu;
+export default observer(ActionMenu);
