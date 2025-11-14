@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "mobile-dev-game",
-    "slug": "mobile-dev-game",
+    "name": "match3medieval",
+    "slug": "match3medieval",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mobiledevgame",
+    "scheme": "match3medieval",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -17,7 +17,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.sqdzy.mobiledevgame"
+      "package": "com.sqdzy.match3medieval"
     },
     "web": {
       "bundler": "metro",
@@ -48,7 +48,11 @@
       "typedRoutes": true
     },
     "extra": {
-      "apiBaseUrl": "http://localhost:5001/api"
+      "apiBaseUrl": "http://localhost:5000/api",
+      "router": {},
+      "eas": {
+        "projectId": "ee99bda4-5547-4fb1-ad8e-12eb281836e4"
+      }
     }
   }
 }
