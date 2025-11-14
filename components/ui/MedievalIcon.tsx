@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { SvgXml } from 'react-native-svg';
 
 export type MedievalIconName =
@@ -118,16 +118,20 @@ const icons: Record<MedievalIconName, (color: string, accent: string) => string>
   `,
 };
 
-export const MedievalIcon: React.FC<MedievalIconProps> = ({
+const MedievalIconComponent: React.FC<MedievalIconProps> = ({
   name,
   size = 32,
   color = '#5e3b1a',
   accentColor = '#f8d9a0',
 }) => {
   const xmlFactory = icons[name];
-  if (!xmlFactory) {
+  const xml = useMemo(() => (xmlFactory ? xmlFactory(color, accentColor) : null), [xmlFactory, color, accentColor]);
+
+  if (!xml) {
     return null;
   }
 
-  return <SvgXml xml={xmlFactory(color, accentColor)} width={size} height={size} />;
+  return <SvgXml xml={xml} width={size} height={size} />;
 };
+
+export const MedievalIcon = memo(MedievalIconComponent);

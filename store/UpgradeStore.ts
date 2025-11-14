@@ -51,6 +51,7 @@ export default class UpgradeStore {
             blastRadius: computed,
             animationTimings: computed,
             loadState: action.bound,
+            applyRemoteLevels: action.bound,
         });
 
         void this.loadState();
@@ -227,6 +228,7 @@ export default class UpgradeStore {
         } else {
             this.levelMap.set(id, Math.min(level, this.getDefinition(id)?.maxLevel ?? level));
         }
+        this.rootStore.authStore?.scheduleSync('upgrade');
     }
 
     getNextCost(id: UpgradeId): number {
@@ -275,8 +277,41 @@ export default class UpgradeStore {
     }
 
     reset(): void {
+        this.performLocalReset();
+        void this.persist();
+        this.rootStore.authStore?.scheduleSync('upgrade:reset');
+    }
+
+    getLevelSnapshot(): Record<UpgradeId, number> {
+        const snapshot: Partial<Record<UpgradeId, number>> = {};
+        this.levelMap.forEach((value, key) => {
+            snapshot[key] = value;
+        });
+        return snapshot as Record<UpgradeId, number>;
+    }
+
+    async clearLocalProgress(): Promise<void> {
+        this.performLocalReset();
+        await this.persist();
+    }
+
+    private performLocalReset(): void {
         runInAction(() => {
             this.levelMap.clear();
+            this.isLoaded = true;
+        });
+    }
+
+    applyRemoteLevels(levels: Record<string, number> = {}) {
+        runInAction(() => {
+            this.levelMap.clear();
+            (Object.entries(levels) as [UpgradeId, number][]).forEach(([id, lvl]) => {
+                const safe = this.sanitizeLevel(lvl);
+                if (safe > 0) {
+                    this.levelMap.set(id, Math.min(safe, this.getDefinition(id)?.maxLevel ?? safe));
+                }
+            });
+            this.isLoaded = true;
         });
         void this.persist();
     }

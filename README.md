@@ -25,6 +25,31 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## Connect to the Flask API
+
+This repository contains a companion Flask service under `server/` that stores player accounts, coins and leaderboard data.
+
+1. Install and run the backend (see `server/README.md` for the full guide):
+
+   ```powershell
+   cd server
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   pip install -r requirements.txt
+   flask --app app run --port 5001
+   ```
+
+2. Point the Expo app to the API before starting Metro. The client reads `process.env.EXPO_PUBLIC_API_BASE_URL` (defaults to `http://localhost:5001/api`). Example for PowerShell:
+
+   ```powershell
+   $env:EXPO_PUBLIC_API_BASE_URL = "http://localhost:5001/api"
+   npm start
+   ```
+
+   On macOS/Linux use `export EXPO_PUBLIC_API_BASE_URL=http://localhost:5001/api`.
+
+With the server running you can register/login with a nickname + password, sync coins/upgrades/stats across devices, and view the secure leaderboard inside the "Лига героев" tab.
+
 ## Get a fresh project
 
 When you're ready, run:
