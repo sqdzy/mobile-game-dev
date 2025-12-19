@@ -14,11 +14,19 @@ export type UpgradeEffectType =
     | 'blastChance'
     | 'discount';
 
+export type UpgradeIconName =
+    | 'coin'
+    | 'hammer'
+    | 'horn'
+    | 'hourglass'
+    | 'flame'
+    | 'tower';
+
 export interface UpgradeDefinition {
     id: UpgradeId;
     title: string;
     description: string;
-    heroIcon: string;
+    heroIcon: UpgradeIconName;
     baseCost: number;
     costGrowth: number;
     maxLevel: number;
@@ -32,7 +40,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
         id: 'royal-ledger',
         title: 'Королевская казна',
         description: 'Сборщики десятин и счётные палаты усиливают каждое совпадение дополнительными монетами.',
-        heroIcon: 'coin-purse',
+        heroIcon: 'coin',
         baseCost: 80,
         costGrowth: 1.55,
         maxLevel: 5,
@@ -44,7 +52,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
         id: 'guild-patrons',
         title: 'Гильдейские покровители',
         description: 'Меценаты подпитывают поле серебром, добавляя фиксированную награду за каждую добычу.',
-        heroIcon: 'artisan-hammer',
+        heroIcon: 'hammer',
         baseCost: 110,
         costGrowth: 1.65,
         maxLevel: 4,
@@ -80,7 +88,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
         id: 'dragon-siege',
         title: 'Драконья осада',
         description: 'Призывает дракона, который изредка выжигает область поля, освобождая место для новых камней и наград.',
-        heroIcon: 'dragon-fire',
+        heroIcon: 'flame',
         baseCost: 180,
         costGrowth: 1.85,
         maxLevel: 3,

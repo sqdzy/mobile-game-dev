@@ -1,7 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
 import React, { memo } from 'react';
 import { Dimensions, Pressable, StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
+
+import { AppIcon, type AppIconName } from '../ui/AppIcon';
 
 const { width: SCREEN_W } = Dimensions.get('window');
 const CELL_SIZE = Math.min((SCREEN_W * 0.9) / 8, 50);
@@ -20,13 +21,13 @@ interface RoundCellProps {
     isRemoving?: boolean;
 }
 
-const iconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
-    'water': 'water',
-    'flame': 'flame',
-    'leaf': 'leaf',
-    'sparkles': 'sparkles',
-    'bug': 'bug',
-    'extension-puzzle': 'extension-puzzle',
+const iconMap: Record<string, AppIconName> = {
+    water: 'water',
+    flame: 'flame',
+    leaf: 'leaf',
+    sparkles: 'sparkles',
+    bug: 'bug',
+    'extension-puzzle': 'puzzle',
 };
 
 const RoundCellComponent: React.FC<RoundCellProps> = ({
@@ -97,7 +98,7 @@ const RoundCellComponent: React.FC<RoundCellProps> = ({
         };
     });
 
-    const iconName = iconMap[icon] || 'extension-puzzle';
+    const iconName = iconMap[icon] || 'puzzle';
 
     return (
         <Animated.View
@@ -115,7 +116,7 @@ const RoundCellComponent: React.FC<RoundCellProps> = ({
                 onPress={() => select(x, y)}
                 style={styles.pressable}
             >
-                <Ionicons name={iconName} size={CELL_SIZE * 0.5} color={color} />
+                <AppIcon name={iconName} size={CELL_SIZE * 0.5} color={color} secondaryColor={color} />
             </Pressable>
         </Animated.View>
     );
@@ -152,6 +153,9 @@ export default memo(RoundCellComponent, (prevProps, nextProps) => {
         prevProps.y === nextProps.y &&
         prevProps.selected === nextProps.selected &&
         prevProps.isRemoving === nextProps.isRemoving &&
-        prevProps.backgroundColor === nextProps.backgroundColor
+        prevProps.backgroundColor === nextProps.backgroundColor &&
+        prevProps.color === nextProps.color &&
+        prevProps.icon === nextProps.icon &&
+        prevProps.zIndex === nextProps.zIndex
     );
 });
