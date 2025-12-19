@@ -3,7 +3,7 @@ import React from 'react';
 import { Platform } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
-import { MedievalIcon } from '@/components/ui/MedievalIcon';
+import { AppIcon } from '@/components/ui/AppIcon';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -31,7 +31,7 @@ export default function TabLayout() {
         options={{
           title: 'Поле',
           tabBarIcon: ({ color }) => (
-            <MedievalIcon name="grid-sigil" size={30} color={color} accentColor="#f3d7a3" />
+            <AppIcon name="grid" size={26} color={String(color)} />
           ),
         }}
       />
@@ -40,7 +40,7 @@ export default function TabLayout() {
         options={{
           title: 'Улучшения',
           tabBarIcon: ({ color }) => (
-            <MedievalIcon name="upgrade-scroll" size={30} color={color} accentColor="#6b3f1a" />
+            <AppIcon name="scroll" size={26} color={String(color)} />
           ),
         }}
       />
@@ -49,7 +49,7 @@ export default function TabLayout() {
         options={{
           title: 'Лига героев',
           tabBarIcon: ({ color }) => (
-            <MedievalIcon name="horn" size={30} color={color} accentColor="#f5c16c" />
+            <AppIcon name="trophy" size={26} color={String(color)} />
           ),
         }}
       />

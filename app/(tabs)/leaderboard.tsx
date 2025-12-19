@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { MedievalIcon } from '@/components/ui/MedievalIcon';
+import { AppIcon } from '@/components/ui/AppIcon';
 import type { LeaderboardEntry } from '@/store/LeaderboardStore';
 import { useRootStore } from '@/store/RootStore';
 
@@ -92,7 +92,9 @@ const LeaderboardScreen: React.FC = () => {
       <SafeAreaView style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.authCard}>
-            <MedievalIcon name="horn" size={72} color="#f8d9a0" accentColor="#7b4f1d" />
+            <View style={styles.authIconBadge}>
+              <AppIcon name="trophy" size={44} color="#f8d9a0" secondaryColor="#7b4f1d" />
+            </View>
             <Text style={styles.authTitle}>Лига героев</Text>
             <Text style={styles.authSubtitle}>
               Создайте аккаунт, чтобы хранить монеты на серверах цитадели и соревноваться с другими игроками.
@@ -257,6 +259,17 @@ const styles = StyleSheet.create({
     padding: 24,
     borderRadius: 16,
     gap: 12,
+  },
+  authIconBadge: {
+    width: 92,
+    height: 92,
+    borderRadius: 46,
+    backgroundColor: '#1a0f06',
+    borderWidth: 1,
+    borderColor: '#3b2717',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 2,
   },
   authTitle: {
     color: '#fbead4',

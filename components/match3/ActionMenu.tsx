@@ -4,7 +4,7 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useRootStore } from '@/store/RootStore';
-import { MedievalIcon } from '../ui/MedievalIcon';
+import { AppIcon } from '../ui/AppIcon';
 
 const ActionMenu: React.FC = () => {
     const router = useRouter();
@@ -22,13 +22,13 @@ const ActionMenu: React.FC = () => {
                 ]}
             >
                 <View style={styles.iconBadge}>
-                    <MedievalIcon name="upgrade-scroll" size={32} color="#f8d9a0" accentColor="#7b4f1d" />
+                    <AppIcon name="scroll" size={28} color="#f8d9a0" secondaryColor="#b6946c" />
                 </View>
                 <View style={styles.commandCopy}>
                     <Text style={styles.commandTitle}>Башня улучшений</Text>
                     <Text style={styles.commandSubtitle}>Откройте чертоги мастеров, чтобы усилить союзников и казну.</Text>
                 </View>
-                <Text style={styles.commandArrow}>&gt;</Text>
+                <AppIcon name="chevron-right" size={20} color="#fbead4" />
             </Pressable>
             <Pressable
                 onPress={() => router.push('/(tabs)/leaderboard')}
@@ -38,7 +38,7 @@ const ActionMenu: React.FC = () => {
                 ]}
             >
                 <View style={styles.iconBadge}>
-                    <MedievalIcon name="horn" size={32} color="#f8d9a0" accentColor="#f5c16c" />
+                    <AppIcon name="trophy" size={28} color="#f8d9a0" secondaryColor="#f5c16c" />
                 </View>
                 <View style={styles.commandCopy}>
                     <Text style={styles.commandTitle}>Лига героев</Text>
@@ -48,7 +48,7 @@ const ActionMenu: React.FC = () => {
                             : 'Войдите и синхронизируйте монеты между устройствами.'}
                     </Text>
                 </View>
-                <Text style={styles.commandArrow}>&gt;</Text>
+                <AppIcon name="chevron-right" size={20} color="#fbead4" />
             </Pressable>
         </View>
     );
@@ -109,11 +109,6 @@ const styles = StyleSheet.create({
     commandSubtitle: {
         fontSize: 13,
         color: '#d9c3a0',
-    },
-    commandArrow: {
-        fontSize: 20,
-        color: '#fbead4',
-        fontWeight: '700',
     },
 });
 

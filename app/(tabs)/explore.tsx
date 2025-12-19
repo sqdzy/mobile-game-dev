@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { MedievalIcon, type MedievalIconName } from '@/components/ui/MedievalIcon';
+import { AppIcon, type AppIconName } from '@/components/ui/AppIcon';
 import { triggerRewardReminderNow } from '@/hooks/useAndroidEnhancements';
 import { useRootStore } from '@/store/RootStore';
 import type { UpgradeSnapshot } from '@/store/UpgradeStore';
@@ -175,7 +175,7 @@ const UpgradeHallScreen: React.FC = () => {
             </Text>
           </View>
           <View style={styles.walletIcon}>
-            <MedievalIcon name="coin-purse" size={64} color="#f8d9a0" accentColor="#7b4f1d" />
+            <AppIcon name="coin" size={52} color="#f8d9a0" secondaryColor="#7b4f1d" />
           </View>
         </View>
         <Text style={styles.heroTitle}>Башня улучшений</Text>
@@ -191,12 +191,7 @@ const UpgradeHallScreen: React.FC = () => {
             pressed && isSoundReady ? styles.audioTogglePressed : null,
           ]}
         >
-          <MedievalIcon
-            name="horn"
-            size={24}
-            color={isAudioEnabled ? '#f8d9a0' : '#b6946c'}
-            accentColor="#3b2717"
-          />
+          <AppIcon name="horn" size={22} color={isAudioEnabled ? '#f8d9a0' : '#b6946c'} secondaryColor="#3b2717" />
           <Text style={styles.audioToggleText}>
             {isAudioEnabled ? 'Звук: включен' : 'Звук: выключен'}
           </Text>
@@ -210,12 +205,7 @@ const UpgradeHallScreen: React.FC = () => {
             pressed && !isNotificationSending ? styles.notificationButtonPressed : null,
           ]}
         >
-          <MedievalIcon
-            name="tower"
-            size={24}
-            color="#f8d9a0"
-            accentColor="#3b2717"
-          />
+          <AppIcon name="tower" size={22} color="#f8d9a0" secondaryColor="#3b2717" />
           <Text style={styles.notificationButtonText}>
             {isNotificationSending ? 'Отправляем…' : 'Напомнить о наградах'}
           </Text>
@@ -245,12 +235,7 @@ const UpgradeHallScreen: React.FC = () => {
       {upgrades.map((upgrade: UpgradeSnapshot) => (
         <View key={upgrade.id} style={styles.upgradeCard}>
           <View style={styles.upgradeIconWrap}>
-            <MedievalIcon
-              name={upgrade.heroIcon as MedievalIconName}
-              size={72}
-              color="#f8d9a0"
-              accentColor="#7b4f1d"
-            />
+            <AppIcon name={upgrade.heroIcon as AppIconName} size={58} color="#f8d9a0" secondaryColor="#7b4f1d" />
           </View>
           <View style={styles.upgradeContent}>
             <View style={styles.upgradeHeader}>
@@ -263,12 +248,7 @@ const UpgradeHallScreen: React.FC = () => {
             </View>
             <Text style={styles.upgradeDescription}>{upgrade.description}</Text>
             <View style={styles.effectRow}>
-              <MedievalIcon
-                name={getEffectIcon(upgrade.effectType)}
-                size={22}
-                color="#f8d9a0"
-                accentColor="#7b4f1d"
-              />
+              <AppIcon name={getEffectIcon(upgrade.effectType)} size={20} color="#f8d9a0" secondaryColor="#7b4f1d" />
               <Text style={styles.effectText}>
                 {renderEffectLabel(upgrade)}
               </Text>
@@ -322,22 +302,22 @@ function renderEffectLabel(upgrade: UpgradeSnapshot): string {
   }
 }
 
-function getEffectIcon(effectType: UpgradeSnapshot['effectType']): MedievalIconName {
+function getEffectIcon(effectType: UpgradeSnapshot['effectType']): AppIconName {
   switch (effectType) {
     case 'coinMultiplier':
-      return 'coin-purse';
+      return 'coin';
     case 'comboFlatBonus':
       return 'horn';
     case 'animationSpeed':
       return 'hourglass';
     case 'flatReward':
-      return 'artisan-hammer';
+      return 'hammer';
     case 'blastChance':
-      return 'dragon-fire';
+      return 'flame';
     case 'discount':
       return 'tower';
     default:
-      return 'upgrade-scroll';
+      return 'scroll';
   }
 }
 

@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import React, { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { MedievalIcon } from '@/components/ui/MedievalIcon';
+import { AppIcon } from '@/components/ui/AppIcon';
 import { useRootStore } from '@/store/RootStore';
 
 const LoginScreen: React.FC = () => {
@@ -54,7 +54,9 @@ const LoginScreen: React.FC = () => {
       keyboardVerticalOffset={88}
     >
       <View style={styles.card}>
-        <MedievalIcon name="tower" size={82} color="#fbead4" accentColor="#2f190d" />
+        <View style={styles.heroIconBadge}>
+          <AppIcon name="tower" size={48} color="#fbead4" secondaryColor="#b6946c" />
+        </View>
         <Text style={styles.title}>{heading}</Text>
         <Text style={styles.subtitle}>Синхронизируйте монеты и прогресс между устройствами</Text>
 
@@ -116,6 +118,16 @@ const styles = StyleSheet.create({
     padding: 24,
     gap: 14,
     alignItems: 'center',
+  },
+  heroIconBadge: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: '#1a0f06',
+    borderWidth: 1,
+    borderColor: '#3b2717',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     color: '#fbead4',
