@@ -1,4 +1,12 @@
-"""Utility script to populate the SQLite database with demo users."""
+"""Utility script to populate the database with a demo user.
+
+This script prompts for a nickname/password and inserts a new user.
+
+Examples:
+    Run from repository root:
+
+    >>> # python -m server.seed
+"""
 
 from getpass import getpass
 
@@ -9,6 +17,13 @@ from .models import User
 
 
 def main():
+    """Create a single user from interactive input.
+
+    Side Effects:
+        - Prompts on stdin.
+        - Writes to the database.
+        - Prints a confirmation message.
+    """
     app = create_app()
     with app.app_context():
         nickname = input("Nickname: ").strip()

@@ -1,3 +1,33 @@
+"""HTTP API routes for the Flask backend.
+
+All routes in this module are mounted under the ``/api`` prefix by
+:func:`server.app.create_app`.
+
+Authentication:
+    Protected routes require a Bearer token:
+
+    ``Authorization: Bearer <token>``
+
+Endpoints:
+    - ``GET /health``: health check.
+    - ``POST /register``: create a user and return token + profile.
+    - ``POST /login``: authenticate and return token + profile.
+    - ``GET /profile``: get current profile snapshot.
+    - ``POST /sync``: upload local snapshot (coins/upgrades/stats).
+    - ``GET /leaderboard``: get top profiles sorted by coins.
+
+Examples:
+    Health check:
+
+    >>> # curl http://localhost:5000/api/health
+
+    Register:
+
+    >>> # curl -X POST http://localhost:5000/api/register \
+    ... #   -H "Content-Type: application/json" \
+    ... #   -d '{"nickname":"hero","password":"secret123"}'
+"""
+
 import json
 from typing import Any, Dict
 
@@ -11,6 +41,15 @@ api_bp = Blueprint("api", __name__)
 
 
 def _parse_payload() -> Dict[str, Any]:
+    """Parse JSON body into a dictionary.
+
+    Returns:
+        Dict[str, Any]: Parsed JSON object if the body is a JSON object, else an
+        empty dictionary.
+
+    Side Effects:
+        Reads request body from :data:`flask.request`.
+    """
     payload = request.get_json(silent=True) or {}
     if not isinstance(payload, dict):
         return {}
@@ -19,11 +58,33 @@ def _parse_payload() -> Dict[str, Any]:
 
 @api_bp.route("/health", methods=["GET"])
 def healthcheck():
+    """Health check endpoint.
+
+    Returns:
+        flask.Response: JSON ``{"status": "ok"}``.
+    """
     return jsonify({"status": "ok"})
 
 
 @api_bp.route("/register", methods=["POST"])
 def register():
+    """Register a new user.
+
+    Request JSON:
+        - ``nickname`` (str): Minimum length 3.
+        - ``password`` (str): Minimum length 6.
+
+    Returns:
+        flask.Response: JSON with keys ``token``, ``nickname``, ``profile``.
+
+    Status Codes:
+        200: User created.
+        400: Nickname/password too short or malformed payload.
+        409: Nickname already exists.
+
+    Side Effects:
+        Inserts a user into the database and creates a related profile.
+    """
     payload = _parse_payload()
     nickname = (payload.get("nickname") or "").strip()
     password = payload.get("password") or ""
@@ -56,6 +117,19 @@ def register():
 
 @api_bp.route("/login", methods=["POST"])
 def login():
+    """Authenticate an existing user.
+
+    Request JSON:
+        - ``nickname`` (str)
+        - ``password`` (str)
+
+    Returns:
+        flask.Response: JSON with keys ``token``, ``nickname``, ``profile``.
+
+    Status Codes:
+        200: Authenticated.
+        401: Invalid credentials.
+    """
     payload = _parse_payload()
     nickname = (payload.get("nickname") or "").strip()
     password = payload.get("password") or ""
@@ -82,6 +156,14 @@ def login():
 @api_bp.route("/profile", methods=["GET"])
 @token_required
 def profile(user: User):
+    """Get the authenticated user's profile snapshot.
+
+    Args:
+        user: Injected by :func:`server.auth.token_required`.
+
+    Returns:
+        flask.Response: JSON profile snapshot.
+    """
     profile = user.profile
     return jsonify({
         "nickname": user.nickname,
@@ -95,6 +177,26 @@ def profile(user: User):
 @api_bp.route("/sync", methods=["POST"])
 @token_required
 def sync(user: User):
+    """Upload and persist a profile snapshot.
+
+    Request JSON:
+        - ``coins`` (number): Will be coerced to ``int`` and clamped to ``>= 0``.
+        - ``upgrades`` (object): JSON object.
+        - ``stats`` (object): JSON object.
+
+    Args:
+        user: Injected by :func:`server.auth.token_required`.
+
+    Returns:
+        flask.Response: JSON profile snapshot after persistence.
+
+    Status Codes:
+        200: Snapshot saved.
+        400: Invalid JSON payload (non-serializable upgrades/stats).
+
+    Side Effects:
+        Writes to the database.
+    """
     payload = _parse_payload()
     coins = payload.get("coins", 0)
     upgrades = payload.get("upgrades", {})
@@ -119,6 +221,20 @@ def sync(user: User):
 @api_bp.route("/leaderboard", methods=["GET"])
 @token_required
 def leaderboard(user: User):
+    """Return the leaderboard.
+
+    Query Params:
+        limit: Max number of entries to return (default 25, max 100).
+
+    Args:
+        user: Injected by :func:`server.auth.token_required`.
+
+    Returns:
+        flask.Response: JSON ``{"entries": [...]}`` sorted by coins desc.
+
+    Side Effects:
+        Performs a database query.
+    """
     limit = min(int(request.args.get("limit", 25)), 100)
     rows = (
         Profile.query.join(User)
