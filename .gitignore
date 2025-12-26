@@ -36,4 +36,7 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# Server data
+server/leaderboard.db
+
 app-example

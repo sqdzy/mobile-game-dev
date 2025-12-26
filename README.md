@@ -63,9 +63,6 @@ npm test
 - Сценарии: `docs/usage.md`
 - API: `docs/api/README.md`
 - Troubleshooting: `docs/troubleshooting.md`
-- Единый отчёт (XeLaTeX, ГОСТ 7.32-2017): `main.tex`
 
 ## Примечания
-- В репозитории нет `.env.example`; переменные окружения задаются вручную.
-- Версии Node.js/Python в репозитории не закреплены.
 - Адрес backend на клиенте задаётся через `EXPO_PUBLIC_API_BASE_URL`.
