@@ -1,8 +1,37 @@
+"""Application configuration.
+
+The backend reads configuration primarily from environment variables.
+Defaults are suitable only for local development.
+
+Environment Variables:
+    API_SECRET_KEY:
+        Secret key used to sign authentication tokens.
+        Default: ``"change-me-in-prod"``.
+
+    DATABASE_URL:
+        SQLAlchemy database URL.
+        Default: SQLite file ``server/leaderboard.db``.
+
+    TOKEN_MAX_AGE:
+        Token validity in seconds.
+        Default: 7 days.
+"""
+
 import os
 from pathlib import Path
 
 
 class Config:
+    """Flask configuration object.
+
+    Attributes:
+        BASE_DIR: Directory containing this module.
+        SECRET_KEY: Used by the token serializer.
+        SQLALCHEMY_DATABASE_URI: Database URL for SQLAlchemy.
+        SQLALCHEMY_TRACK_MODIFICATIONS: Disabled to reduce overhead.
+        TOKEN_MAX_AGE: Token max age (seconds).
+        JSON_SORT_KEYS: Disabled to preserve response key order.
+    """
     BASE_DIR = Path(__file__).resolve().parent
     SECRET_KEY = os.environ.get("API_SECRET_KEY", "change-me-in-prod")
     SQLALCHEMY_DATABASE_URI = os.environ.get(
