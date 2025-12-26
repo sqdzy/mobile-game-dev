@@ -24,7 +24,7 @@
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r server\requirements.txt
-flask --app server.app run --host 0.0.0.0 --port 5000
+flask run --host 0.0.0.0 --port 5000
 ```
 
 Примечания:
