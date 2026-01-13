@@ -10,6 +10,15 @@ const GRID_SIZE = Math.min(SCREEN_W * 0.9, 400);
 const GameGrid: React.FC = () => {
     const rootStore = useRootStore();
     const { info, select } = rootStore.gridStore;
+    const hintCells = info.hintCells;
+
+    const isHintedCell = (x: number, y: number): boolean => {
+        if (!hintCells) return false;
+        return (
+            (hintCells.from.x === x && hintCells.from.y === y) ||
+            (hintCells.to.x === x && hintCells.to.y === y)
+        );
+    };
 
     return (
         <View style={styles.container}>
@@ -29,6 +38,7 @@ const GameGrid: React.FC = () => {
                                 zIndex={cellInfo.zIndex}
                                 icon={cellInfo.icon}
                                 select={select}
+                                isHinted={isHintedCell(cellInfo.x, cellInfo.y)}
                             />
                         );
                     }

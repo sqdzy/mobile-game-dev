@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { action, computed, makeObservable, observable, reaction, runInAction } from "mobx";
 import Grid, { MatchResult, type CellSnapshot } from "../domain/Grid";
 import Match from "../domain/Match";
+import audioService from "../services/AudioService";
 import type { RootStore } from "./RootStore";
 
 const squareSize = 8;
@@ -12,13 +13,20 @@ interface SimpleCell {
     y: number;
 }
 
+interface HintCells {
+    from: SimpleCell;
+    to: SimpleCell;
+}
+
 export default class GridStore {
     private rootStore: RootStore;
     matches: Match[] = [];
     oldMatches: Match[] = [];
     grid: Grid;
+    hintCells: HintCells | null = null;
     private persistHandle: ReturnType<typeof setTimeout> | null = null;
     private isRestoring = false;
+    private hintTimeout: ReturnType<typeof setTimeout> | null = null;
 
     constructor(rootStore: RootStore) {
         this.rootStore = rootStore;
@@ -28,9 +36,12 @@ export default class GridStore {
             matches: observable,
             oldMatches: observable,
             grid: observable,
+            hintCells: observable,
             info: computed,
             reset: action,
             select: action,
+            showHint: action,
+            clearHint: action,
             countMatch: action.bound,
             getMatch: action.bound,
             removeMatches: action.bound,
@@ -127,43 +138,34 @@ export default class GridStore {
                 const matches = newMatches.filter(x => !this.oldMatches.includes(x));
                 const upgradeStore = this.rootStore.upgradeStore;
                 const timings = upgradeStore.animationTimings;
+                
+                if (matches.length > 0) {
+                    const maxMatchSize = Math.max(...matches.map(m => m.suite + 1));
+                    void audioService.playMatch(maxMatchSize);
+                    
+                    if (matches.length > 1) {
+                        setTimeout(() => {
+                            void audioService.play('combo');
+                        }, 100);
+                    }
+                }
+                
                 matches.forEach(match => {
-                    // Задержка для логирования после анимации
-                    setTimeout(
-                        () => { this.rootStore.messageStore.addMatch(match); },
-                        timings.resolveDelay
-                    );
                     if (match.suite === 2) {
-                        setTimeout(
-                            () => { this.rootStore.statStore.addMatch3(); },
-                            timings.resolveDelay
-                        );
+                        setTimeout(() => { this.rootStore.statStore.addMatch3(); }, timings.resolveDelay);
                     }
                     if (match.suite === 3) {
-                        setTimeout(
-                            () => { this.rootStore.statStore.addMatch4(); },
-                            timings.resolveDelay
-                        );
+                        setTimeout(() => { this.rootStore.statStore.addMatch4(); }, timings.resolveDelay);
                     }
                     if (match.suite === 4) {
-                        setTimeout(
-                            () => { this.rootStore.statStore.addMatch5(); },
-                            timings.resolveDelay
-                        );
+                        setTimeout(() => { this.rootStore.statStore.addMatch5(); }, timings.resolveDelay);
                     }
-                    setTimeout(
-                        () => { this.rootStore.statStore.addColor(match.color, match.suite + 1); },
-                        timings.resolveDelay
-                    );
-                    setTimeout(
-                        () => { void this.rootStore.currencyStore.rewardMatch(match); },
-                        timings.resolveDelay
-                    );
+                    setTimeout(() => { this.rootStore.statStore.addColor(match.color, match.suite + 1); }, timings.resolveDelay);
+                    setTimeout(() => { void this.rootStore.currencyStore.rewardMatch(match); }, timings.resolveDelay);
                 });
+                
                 if (matches.length > 0 && upgradeStore.blastChance > 0) {
-                    setTimeout(() => {
-                        this.maybeTriggerBlast();
-                    }, timings.blastDelay);
+                    setTimeout(() => { this.maybeTriggerBlast(); }, timings.blastDelay);
                 }
                 this.oldMatches = [...newMatches];
             }
@@ -180,18 +182,41 @@ export default class GridStore {
         return {
             grid: this.grid,
             selectedCell: this.grid.selectedCell,
-            canMove: this.grid.canMove
+            canMove: this.grid.canMove,
+            hintCells: this.hintCells
         };
     }
 
+    showHint = () => {
+        this.clearHint();
+        const hint = this.grid.findHint();
+        if (hint) {
+            this.hintCells = hint;
+            // Автоматически скрываем подсказку через 3 секунды
+            this.hintTimeout = setTimeout(() => {
+                runInAction(() => {
+                    this.hintCells = null;
+                });
+            }, 3000);
+        } else {
+            // Нет доступных ходов - перемешиваем
+            this.reset();
+        }
+    };
+
+    clearHint = () => {
+        this.hintCells = null;
+    };
+
     reset = () => {
+        this.clearHint();
         this.grid = new Grid(squareSize);
         this.rebuildStatsFromGrid();
-        this.rootStore.messageStore.add('Reset');
         this.schedulePersist(true);
     };
 
     select = (x: number, y: number) => {
+        this.clearHint();
         const selectedCell = this.grid.selectedCell;
         let sc: SimpleCell | null = null;
         if (selectedCell !== null) {
@@ -203,7 +228,6 @@ export default class GridStore {
                 let matches: MatchResult = this.grid.getGridMatch(false);
                 const timings = this.rootStore.upgradeStore.animationTimings;
                 if (matches.cellsToRemove.length === 0) {
-                    // Возврат назад если нет совпадений
                     setTimeout(() => {
                         runInAction(() => {
                             if (sc !== null) {
@@ -213,7 +237,6 @@ export default class GridStore {
                         });
                     }, timings.revertDelay);
                 } else if (matches.cellsToRemove.length > 0) {
-                    // Задержка перед удалением для анимации
                     setTimeout(() => {
                         runInAction(() => {
                             this.matches = this.matches.concat(matches.matches);
@@ -283,7 +306,7 @@ export default class GridStore {
             return;
         }
 
-        this.rootStore.messageStore.add('Дракон обрушивает огненный залп по полю!');
+        void audioService.play('dragonBlast');
         const timings = upgradeStore.animationTimings;
         setTimeout(() => {
             this.applyBlastReward(affected.length);
@@ -313,7 +336,7 @@ export default class GridStore {
             this.rootStore.statStore.addColorCount(c.name, 1);
         });
         const timings = this.rootStore.upgradeStore.animationTimings;
-        // Задержка для анимации падения
+        
         setTimeout(() => {
             runInAction(() => {
                 this.grid.moveNewCells();
@@ -321,7 +344,6 @@ export default class GridStore {
             this.schedulePersist();
         }, timings.dropDelay);
         
-        // Проверка комбо после завершения падения
         const newMatches: MatchResult = this.grid.getGridMatch(true);
         if (newMatches.cellsToRemove.length > 0) {
             setTimeout(() => {
@@ -333,7 +355,6 @@ export default class GridStore {
                 this.removeMatches(newMatches.cellsToRemove);
             }, timings.comboResolveDelay);
         } else {
-            // Даем время для завершения анимации
             setTimeout(() => {
                 runInAction(() => {
                     this.grid.canMove = true;
