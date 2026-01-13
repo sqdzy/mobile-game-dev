@@ -1,4 +1,4 @@
-import { action, computed, makeObservable, observable } from "mobx";
+import { action, makeObservable, observable } from "mobx";
 import Match from "../domain/Match";
 import Message from "../domain/Message";
 import type { RootStore } from "./RootStore";
@@ -11,8 +11,7 @@ export default class MessageStore {
         this.rootStore = rootStore;
         
         makeObservable(this, {
-            messages: observable,
-            allMessages: computed,
+            messages: observable.shallow,
             add: action,
             addMatch: action,
         });
@@ -23,11 +22,11 @@ export default class MessageStore {
     }
 
     add = (message: string) => {
-        this.messages.push(new Message(message));
+        this.messages = [...this.messages, new Message(message)];
     };
 
     addMatch = (match: Match) => {
         const message = 'Match-' + (match.suite + 1) + " " + match.color + (match.isCombo ? ' COMBO' : '');
-        this.messages.push(new Message(message));
+        this.messages = [...this.messages, new Message(message)];
     };
 }

@@ -1,10 +1,9 @@
-import { Asset } from 'expo-asset';
-import { Audio } from 'expo-av';
 import { observer } from 'mobx-react-lite';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AppIcon, type AppIconName } from '@/components/ui/AppIcon';
+import { useAudio } from '@/contexts/AudioContext';
 import { triggerRewardReminderNow } from '@/hooks/useAndroidEnhancements';
 import { useRootStore } from '@/store/RootStore';
 import type { UpgradeSnapshot } from '@/store/UpgradeStore';
@@ -12,10 +11,8 @@ import type { UpgradeSnapshot } from '@/store/UpgradeStore';
 const UpgradeHallScreen: React.FC = () => {
   const rootStore = useRootStore();
   const { currencyStore, upgradeStore } = rootStore;
+  const { isEnabled: isAudioEnabled, isReady: isSoundReady, setEnabled: setAudioEnabled, play } = useAudio();
   const [status, setStatus] = useState<{ tone: 'success' | 'error' | 'info'; message: string } | null>(null);
-  const soundRef = useRef<Audio.Sound | null>(null);
-  const [isSoundReady, setSoundReady] = useState(false);
-  const [isAudioEnabled, setAudioEnabled] = useState(true);
   const [isNotificationSending, setNotificationSending] = useState(false);
 
   const upgrades: UpgradeSnapshot[] = upgradeStore.catalog;
@@ -54,54 +51,12 @@ const UpgradeHallScreen: React.FC = () => {
     [animationReduction, blastChance, coinRewardMultiplier, flatRewardBonus, upgradeDiscount]
   );
 
-  useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      try {
-        const asset = Asset.fromModule(upgradeStore.purchaseSound);
-        if (!asset.downloaded) {
-          await asset.downloadAsync();
-        }
-        const source = asset.localUri ? { uri: asset.localUri } : upgradeStore.purchaseSound;
-        const { sound } = await Audio.Sound.createAsync(source);
-        await sound.setVolumeAsync(1);
-        if (!isMounted) {
-          await sound.unloadAsync();
-          return;
-        }
-        soundRef.current = sound;
-        setSoundReady(true);
-      } catch (error) {
-        console.error('Failed to load purchase sound', error);
-      }
-    })();
-
-    return () => {
-      isMounted = false;
-      if (soundRef.current) {
-        void soundRef.current.unloadAsync();
-        soundRef.current = null;
-      }
-    };
-  }, [upgradeStore.purchaseSound]);
-
-  const playPurchaseSound = async () => {
-    try {
-      if (soundRef.current && isAudioEnabled) {
-        await soundRef.current.replayAsync();
-      }
-    } catch (error) {
-      console.error('Failed to play purchase sound', error);
-    }
-  };
-
   const handlePurchase = async (upgrade: UpgradeSnapshot) => {
     const result = await upgradeStore.purchase(upgrade.id);
     if (result.success) {
       setStatus({ tone: 'success', message: `«${upgrade.title}» возвышается до уровня ${upgrade.level + 1}.` });
-      if (isSoundReady) {
-        await playPurchaseSound();
-      }
+      // Воспроизводим звук покупки через AudioService
+      await play('purchase');
       return;
     }
 
@@ -116,22 +71,8 @@ const UpgradeHallScreen: React.FC = () => {
     setStatus({ tone: 'error', message });
   };
 
-  const toggleAudio = async () => {
-    const next = !isAudioEnabled;
-    setAudioEnabled(next);
-    if (!soundRef.current) {
-      return;
-    }
-    try {
-      if (next) {
-        await soundRef.current.setPositionAsync(0);
-        await soundRef.current.playAsync();
-      } else {
-        await soundRef.current.stopAsync();
-      }
-    } catch (error) {
-      console.error('Failed to toggle audio', error);
-    }
+  const toggleAudio = () => {
+    setAudioEnabled(!isAudioEnabled);
   };
 
   const handleTestNotification = async () => {
@@ -322,6 +263,7 @@ function getEffectIcon(effectType: UpgradeSnapshot['effectType']): AppIconName {
 }
 
 export default observer(UpgradeHallScreen);
+
 
 const styles = StyleSheet.create({
   container: {

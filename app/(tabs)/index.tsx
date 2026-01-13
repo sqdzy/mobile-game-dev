@@ -1,9 +1,6 @@
 import ActionMenu from '@/components/match3/ActionMenu';
 import GameGrid from '@/components/match3/GameGrid';
-import LogCard from '@/components/match3/LogCard';
-import StatsCard from '@/components/match3/StatsCard';
-import { useRootStore } from '@/store/RootStore';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -11,12 +8,6 @@ const { width: SCREEN_W } = Dimensions.get('window');
 const isTablet = SCREEN_W > 768;
 
 export default function Match3Game() {
-  const rootStore = useRootStore();
-
-  useEffect(() => {
-    rootStore.messageStore.add('Герольд объявляет начало битвы.');
-  }, [rootStore]);
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView 
@@ -30,18 +21,12 @@ export default function Match3Game() {
             </View>
             <View style={styles.tabletRight}>
               <ActionMenu />
-              <StatsCard />
-              <LogCard />
             </View>
           </View>
         ) : (
           <View style={styles.mobileLayout}>
             <GameGrid />
-            <View style={styles.sidePanel}>
-              <ActionMenu />
-              <StatsCard />
-              <LogCard />
-            </View>
+            <ActionMenu />
           </View>
         )}
       </ScrollView>
@@ -71,8 +56,5 @@ const styles = StyleSheet.create({
   },
   mobileLayout: {
     gap: 15,
-  },
-  sidePanel: {
-    gap: 12,
   },
 });

@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useMemo } from 'react';
 import 'react-native-reanimated';
 
+import { AudioProvider } from '@/contexts/AudioContext';
 import { useAndroidEnhancements } from '@/hooks/useAndroidEnhancements';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import '@/notifications/handler';
@@ -25,14 +26,16 @@ export default function RootLayout() {
 
   return (
     <RootStoreContext.Provider value={rootStore}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="login" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <AudioProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="login" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </AudioProvider>
     </RootStoreContext.Provider>
   );
 }

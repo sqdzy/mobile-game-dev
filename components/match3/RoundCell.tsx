@@ -1,6 +1,14 @@
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { Dimensions, Pressable, StyleSheet } from 'react-native';
-import Animated, { useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, {
+    cancelAnimation,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withSequence,
+    withSpring,
+    withTiming,
+} from 'react-native-reanimated';
 
 import { AppIcon, type AppIconName } from '../ui/AppIcon';
 
@@ -19,6 +27,7 @@ interface RoundCellProps {
     icon: string;
     select: (x: number, y: number) => void;
     isRemoving?: boolean;
+    isHinted?: boolean;
 }
 
 const iconMap: Record<string, AppIconName> = {
@@ -42,10 +51,38 @@ const RoundCellComponent: React.FC<RoundCellProps> = ({
     icon,
     select,
     isRemoving = false,
+    isHinted = false,
 }) => {
-    // Анимация выделения и удаления (масштаб и прозрачность)
+    const hintScale = useSharedValue(1);
+    const hintGlow = useSharedValue(0);
+
+    useEffect(() => {
+        if (isHinted) {
+            hintScale.value = withRepeat(
+                withSequence(
+                    withTiming(1.15, { duration: 400 }),
+                    withTiming(1, { duration: 400 })
+                ),
+                -1,
+                true
+            );
+            hintGlow.value = withRepeat(
+                withSequence(
+                    withTiming(1, { duration: 400 }),
+                    withTiming(0.3, { duration: 400 })
+                ),
+                -1,
+                true
+            );
+        } else {
+            cancelAnimation(hintScale);
+            cancelAnimation(hintGlow);
+            hintScale.value = withTiming(1, { duration: 150 });
+            hintGlow.value = withTiming(0, { duration: 150 });
+        }
+    }, [isHinted, hintScale, hintGlow]);
+
     const selectionStyle = useAnimatedStyle(() => {
-        // Скрываем ячейки которые за пределами поля (сверху)
         if (top < 0) {
             return {
                 transform: [{ scale: 1 }],
@@ -55,42 +92,34 @@ const RoundCellComponent: React.FC<RoundCellProps> = ({
         
         if (isRemoving) {
             return {
-                transform: [
-                    { 
-                        scale: withSpring(0, { 
-                            damping: 15, 
-                            stiffness: 150,
-                            mass: 0.5
-                        }) 
-                    }
-                ],
+                transform: [{ scale: withSpring(0, { damping: 15, stiffness: 150, mass: 0.5 }) }],
                 opacity: withTiming(0, { duration: 300 }),
             };
         }
+
+        const baseScale = selected ? 1.15 : 1;
         
         return {
-            transform: [
-                { 
-                    scale: withSpring(selected ? 1.15 : 1, { 
-                        damping: 15, 
-                        stiffness: 150,
-                        mass: 0.5
-                    }) 
-                }
-            ],
+            transform: [{ scale: isHinted ? hintScale.value : withSpring(baseScale, { damping: 15, stiffness: 150, mass: 0.5 }) }],
             opacity: withTiming(selected ? 0.85 : 1, { duration: 200 }),
         };
     });
 
-    // Плавная анимация позиции (для падения и перемещения)
+    const glowStyle = useAnimatedStyle(() => {
+        return {
+            shadowOpacity: hintGlow.value * 0.8,
+            shadowRadius: 8 + hintGlow.value * 8,
+        };
+    });
+
     const positionStyle = useAnimatedStyle(() => {
         return {
-            top: withSpring(`${top}%` as any, {
+            top: withSpring(`${top}%` as unknown as number, {
                 damping: 20,
                 stiffness: 90,
                 mass: 0.8,
             }),
-            left: withSpring(`${left}%` as any, {
+            left: withSpring(`${left}%` as unknown as number, {
                 damping: 20,
                 stiffness: 90,
                 mass: 0.8,
@@ -107,10 +136,14 @@ const RoundCellComponent: React.FC<RoundCellProps> = ({
                 {
                     backgroundColor,
                     zIndex,
+                    borderWidth: isHinted ? 3 : 0,
+                    borderColor: isHinted ? '#FFD700' : 'transparent',
+                    shadowColor: isHinted ? '#FFD700' : '#000',
                 },
                 positionStyle,
                 selectionStyle,
-            ] as any}
+                isHinted && glowStyle,
+            ]}
         >
             <Pressable
                 onPress={() => select(x, y)}
@@ -153,6 +186,7 @@ export default memo(RoundCellComponent, (prevProps, nextProps) => {
         prevProps.y === nextProps.y &&
         prevProps.selected === nextProps.selected &&
         prevProps.isRemoving === nextProps.isRemoving &&
+        prevProps.isHinted === nextProps.isHinted &&
         prevProps.backgroundColor === nextProps.backgroundColor &&
         prevProps.color === nextProps.color &&
         prevProps.icon === nextProps.icon &&

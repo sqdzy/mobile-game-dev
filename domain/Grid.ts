@@ -390,4 +390,73 @@ export default class Grid {
         }
         return true;
     }
+
+    findHint(): { from: SimpleCell; to: SimpleCell } | null {
+        // Создаём карту цветов для быстрого доступа без мутации
+        const colorMap = new Map<string, string>();
+        for (const cell of this.cells) {
+            colorMap.set(`${cell.x}:${cell.y}`, cell.name);
+        }
+
+        const getColor = (x: number, y: number): string | null => {
+            return colorMap.get(`${x}:${y}`) ?? null;
+        };
+
+        const checkMatchAtWithSwap = (
+            checkX: number, checkY: number, 
+            swapX1: number, swapY1: number, 
+            swapX2: number, swapY2: number
+        ): boolean => {
+            const getSwappedColor = (cx: number, cy: number): string | null => {
+                if (cx === swapX1 && cy === swapY1) return getColor(swapX2, swapY2);
+                if (cx === swapX2 && cy === swapY2) return getColor(swapX1, swapY1);
+                return getColor(cx, cy);
+            };
+
+            const color = getSwappedColor(checkX, checkY);
+            if (!color) return false;
+
+            let hCount = 1;
+            for (let i = checkX - 1; i >= 0; i--) {
+                if (getSwappedColor(i, checkY) === color) hCount++;
+                else break;
+            }
+            for (let i = checkX + 1; i < this.squareSize; i++) {
+                if (getSwappedColor(i, checkY) === color) hCount++;
+                else break;
+            }
+            if (hCount >= 3) return true;
+
+            let vCount = 1;
+            for (let i = checkY - 1; i >= 0; i--) {
+                if (getSwappedColor(checkX, i) === color) vCount++;
+                else break;
+            }
+            for (let i = checkY + 1; i < this.squareSize; i++) {
+                if (getSwappedColor(checkX, i) === color) vCount++;
+                else break;
+            }
+            if (vCount >= 3) return true;
+
+            return false;
+        };
+
+        for (let x = 0; x < this.squareSize; x++) {
+            for (let y = 0; y < this.squareSize; y++) {
+                if (x < this.squareSize - 1) {
+                    if (checkMatchAtWithSwap(x, y, x, y, x + 1, y) || 
+                        checkMatchAtWithSwap(x + 1, y, x, y, x + 1, y)) {
+                        return { from: { x, y }, to: { x: x + 1, y } };
+                    }
+                }
+                if (y < this.squareSize - 1) {
+                    if (checkMatchAtWithSwap(x, y, x, y, x, y + 1) || 
+                        checkMatchAtWithSwap(x, y + 1, x, y, x, y + 1)) {
+                        return { from: { x, y }, to: { x, y: y + 1 } };
+                    }
+                }
+            }
+        }
+        return null;
+    }
 }
