@@ -1,8 +1,19 @@
 {
   "cli": {
-    "version": ">= 14.3.2"
+    "version": ">= 14.3.2",
+    "appVersionSource": "local"
   },
   "build": {
+    "development": {
+      "developmentClient": false,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "http://192.168.0.156:5000/api"
+      }
+    },
     "preview": {
       "distribution": "internal",
       "android": {

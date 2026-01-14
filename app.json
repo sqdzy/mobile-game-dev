@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "match3medieval",
-    "slug": "match3medieval",
+    "slug": "mobile-dev-game",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
