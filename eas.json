@@ -11,7 +11,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "http://192.168.0.156:5000/api"
+        "EXPO_PUBLIC_API_BASE_URL": "https://mobile-game-dev.onrender.com/api"
       }
     },
     "preview": {
@@ -23,7 +23,7 @@
         "simulator": true
       },
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://staging.match3medieval.com/api"
+        "EXPO_PUBLIC_API_BASE_URL": "https://mobile-game-dev.onrender.com/api"
       }
     },
     "production": {
@@ -36,7 +36,7 @@
         "resourceClass": "m-medium"
       },
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://api.match3medieval.com/api"
+        "EXPO_PUBLIC_API_BASE_URL": "https://mobile-game-dev.onrender.com/api"
       }
     }
   },
